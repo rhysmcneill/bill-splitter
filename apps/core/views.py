@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect
-from .forms import SignupForm, BusinessLoginForm
+from .forms import BusinessSignupForm, BusinessLoginForm
 from .models import CustomUser, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -10,7 +10,7 @@ from django.http import HttpResponseForbidden
 
 @login_required
 def dashboard_view(request, business_slug):
-    # Optional: ensure slug matches logged-in user's business
+    # Ensure business slug matches logged-in user's business
     if request.user.business.slug != business_slug:
         return HttpResponseForbidden(
             render(request, "core/403.html", status=403)
@@ -22,11 +22,11 @@ def dashboard_view(request, business_slug):
 
 class SignupView(View):
     def get(self, request):
-        form = SignupForm()
+        form = BusinessSignupForm()
         return render(request, 'core/signup.html', {'form': form})
 
     def post(self, request):
-        form = SignupForm(request.POST)
+        form = BusinessSignupForm(request.POST)
         if form.is_valid():
             # Create business
             business = Business.objects.create(
@@ -77,7 +77,7 @@ class LoginView(View):
                 messages.success(request, "Login Success. Welcome to Payr! 🎉")
                 return redirect('business_dashboard', business_slug=user.business.slug)
             else:
-                messages.error(request, "Login failed. Your account is not linked to a business.")
+                messages.error(request, "Login failed. Your account is not linked to a business. ⛔")
                 return render(request, 'core/login.html', {'form': form})
 
         return render(request, 'core/login.html', {'form': form})

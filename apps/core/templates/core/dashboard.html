@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ business.name }}{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Welcome, {{ request.user.username }}</h1>
+    <span class="text-lg text-gray-500">Business: <strong>{{ business.name }}</strong></span>
+  </div>
+
+  <!-- Showing success message after logging into the application -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <!-- Bills Summary Card -->
+    <div class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Your Bills</h2>
+      <p class="text-gray-600">Track and manage all active and past bills.</p>
+      <a href="#" class="mt-4 inline-block text-blue-500 hover:underline">View Bills</a>
+    </div>
+
+    <!-- Create Bill CTA -->
+    <div class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Create New Bill</h2>
+      <p class="text-gray-600">Start a new bill for a table and generate a QR code.</p>
+      <a href="#" class="mt-4 inline-block text-blue-500 hover:underline">Create Bill</a>
+    </div>
+  </div>
+{% endblock %}

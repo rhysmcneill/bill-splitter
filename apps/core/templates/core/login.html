@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Payr{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+  <h1 class="text-2xl font-bold text-blue-500 mb-4">Login to Payr</h1>
+
+    <!-- Showing success message after logging into the application -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+  <!-- This is for form validation and error messages -->
+  {% if form.errors %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+      <strong class="block mb-1">There was a problem logging in:</strong>
+      <ul class="list-disc list-inside space-y-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- Form -->
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mt-4">
+      Log In
+    </button>
+  </form>
+
+  <p class="text-sm text-gray-600 mt-4 text-center">
+    Don't have an account?
+    <a href="{% url 'signup' %}" class="text-blue-500 hover:underline">Sign up</a>
+  </p>
+</div>
+{% endblock %}

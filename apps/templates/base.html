@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Payr{% endblock %}</title>
+    <title>{% block title %}Dividr{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Tailwind CSS -->
@@ -21,7 +21,7 @@
     <!-- Navbar -->
     <header class="bg-white shadow-sm py-4">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-            <a href="{% url 'login' %}" class="text-2xl font-bold text-blue-500">Payr</a>
+            <a href="{% url 'login' %}" class="text-2xl font-bold text-blue-500">Dividr</a>
             {% if request.user.is_authenticated %}
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-700">Hi, {{ request.user.username }}</span>
@@ -40,7 +40,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-200 text-center py-3 text-sm text-gray-600">
-        &copy; {{ now|date:"Y" }} Payr. All rights reserved.
+        &copy; {{ now|date:"Y" }} Dividr. All rights reserved.
     </footer>
 
 </body>

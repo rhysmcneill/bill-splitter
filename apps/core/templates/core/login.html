@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Login - Dividr{% endblock %}
+{% block title %}Login - dividr.{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-  <h1 class="text-2xl font-bold text-blue-500 mb-4">Login to Dividr</h1>
+  <h1 class="text-2xl font-bold text-blue-500 mb-4">Login to dividr.</h1>
 
     <!-- Showing success message after logging into the application -->
   {% if messages %}
     {% for message in messages %}
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-        {{ message }}
+        {{ message|safe }}
       </div>
     {% endfor %}
   {% endif %}

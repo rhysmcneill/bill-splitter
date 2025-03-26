@@ -7,17 +7,15 @@ from .models import CustomUser, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from .decorators import business_required
 
+
+@business_required
 @login_required
 def dashboard_view(request, business_slug):
-    # Ensure business slug matches logged-in user's business
-    if request.user.business.slug != business_slug:
-        return HttpResponseForbidden(
-            render(request, "core/403.html", status=403)
-        )
-
+    business = request.business
     return render(request, 'core/dashboard.html', {
-        'business': request.user.business
+        'business': business
     })
 
 class SignupView(View):
@@ -40,7 +38,7 @@ class SignupView(View):
             user.save()
 
             login(request, user)
-            messages.success(request, "Account created successfully. Welcome to Dividr! 🎉")
+            messages.success(request, "Account created successfully. Welcome to dividr! 🎉")
             return redirect('business_dashboard', business_slug=business.slug)
 
         # Pass form errors back to template
@@ -74,10 +72,10 @@ class LoginView(View):
 
             if user is not None and user.business:
                 login(request, user)
-                messages.success(request, "Login Success. Welcome to Dividr! 🎉")
+                messages.success(request, "Login Success. Welcome to dividr! 🎉")
                 return redirect('business_dashboard', business_slug=user.business.slug)
             else:
-                messages.error(request, "Login failed. Your account is not linked to a business. ⛔")
+                messages.error(request, "Login failed ⛔ <br><br> Check that your details are correct and try again.")
                 return render(request, 'core/login.html', {'form': form})
 
         return render(request, 'core/login.html', {'form': form})

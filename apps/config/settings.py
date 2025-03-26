@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'theme',
     'crispy_forms',
     'crispy_tailwind',
+    'widget_tweaks',
 ]
 
 TAILWIND_APP_NAME = 'theme'
@@ -77,6 +78,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.current_business',
+
             ],
         },
     },

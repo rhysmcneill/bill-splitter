@@ -7,6 +7,7 @@ class Bill(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     table_number = models.CharField(max_length=10)
+    notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=10,
@@ -18,11 +19,12 @@ class Bill(models.Model):
         default='unpaid'
     )
 
-    def __str__(self):
-        return f"Bill {self.uuid} - Table {self.table_number}"
+    @property
+    def total_amount(self):
+        return sum(item.price for item in self.items.all())
 
 
-class Item(models.Model):
+class BillItem(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=255)

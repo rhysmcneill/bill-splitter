@@ -38,7 +38,7 @@ class SignupView(View):
             user.save()
 
             login(request, user)
-            messages.success(request, "Account created successfully. Welcome to dividr..! 🎉")
+            messages.success(request, "Account created successfully. Welcome to dividr! 🎉")
             return redirect('business_dashboard', business_slug=business.slug)
 
         # Pass form errors back to template
@@ -72,7 +72,7 @@ class LoginView(View):
 
             if user is not None and user.business:
                 login(request, user)
-                messages.success(request, "Login Success. Welcome to dividr.! 🎉")
+                messages.success(request, "Login Success. Welcome to dividr! 🎉")
                 return redirect('business_dashboard', business_slug=user.business.slug)
             else:
                 messages.error(request, "Login failed ⛔ <br><br> Check that your details are correct and try again.")

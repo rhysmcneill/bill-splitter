@@ -18,6 +18,15 @@ def dashboard_view(request, business_slug):
         'business': business
     })
 
+
+def landing_view(request):
+    # Session-aware redirect
+    if request.user.is_authenticated and getattr(request, 'business', None):
+        return redirect('business_dashboard', business_slug=request.business.slug)
+    return render(request, 'core/landing.html')
+
+
+# Sign up view
 class SignupView(View):
     def get(self, request):
         form = BusinessSignupForm()

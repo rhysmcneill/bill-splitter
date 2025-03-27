@@ -28,7 +28,9 @@
     <div class="p-6 bg-white rounded-lg shadow-md">
       <h2 class="text-xl font-semibold mb-2">Create New Bill</h2>
       <p class="text-gray-600">Start a new bill for a table and generate a QR code.</p>
-      <a href="#" class="mt-4 inline-block text-blue-500 hover:underline">Create Bill</a>
+      {% if current_business %}
+        <a href="{% url 'create_bill' current_business.slug %}" class="mt-4 inline-block text-blue-500 hover:underline">Create Bill</a>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

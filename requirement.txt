@@ -5,3 +5,4 @@ qrcode
 django-tailwind
 django-crispy-forms
 crispy-tailwind
+django-widget-tweaks

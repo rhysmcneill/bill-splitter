@@ -1,6 +1,6 @@
 from django.urls import path
-from django.contrib.auth.views import LoginView, LogoutView
-from .views import dashboard_view, SignupView, LoginView
+from django.contrib.auth.views import LogoutView
+from .views import dashboard_view, SignupView, LoginView, landing_view
 
 urlpatterns = [
     # Auth
@@ -11,4 +11,7 @@ urlpatterns = [
 
     # Dashboard
     path('business/<slug:business_slug>/', dashboard_view, name='business_dashboard'),
+
+    path('', landing_view, name='landing'),
+
 ]

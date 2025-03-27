@@ -23,6 +23,13 @@ class Bill(models.Model):
     def total_amount(self):
         return sum(item.price for item in self.items.all())
 
+    @property
+    def progress_pct(self):
+        total_paid = sum(p.amount for p in self.payments.filter(status='confirmed'))
+        return (total_paid / self.total_amount * 100) if self.total_amount > 0 else 0
+
+    def __str__(self):
+        return f"Bill {self.uuid} - Table {self.table_number}"
 
 class BillItem(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
@@ -48,15 +55,17 @@ class Payment(models.Model):
             ('bank', 'Bank Transfer')
         ],
         default='bank'
-    ),
+    )
+
     status = models.CharField(
         max_length=20,
         choices=[
             ('pending', 'Pending'),
             ('confirmed', 'Confirmed'),
             ('failed', 'Failed')
-        ]
-    ),
+        ],
+        default='pending'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

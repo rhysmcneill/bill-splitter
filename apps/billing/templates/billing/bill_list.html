@@ -2,7 +2,8 @@
 {% block title %}Bills - dividr.{% endblock %}
 
 {% block content %}
-<div x-data="{ showModal: false, actionUrl: '' }">
+<!-- Root Alpine.js scope -->
+<div x-data="{ showModal: false, actionUrl: '' }" x-init="showModal = false">
 
   <div class="max-w-5xl mx-auto px-4 py-10">
 
@@ -28,7 +29,7 @@
       <div class="space-y-4">
         {% for bill in bills %}
         <div class="relative group hover:shadow-md transition rounded-lg border bg-white p-4 overflow-hidden">
-          <!-- Make the entire card clickable -->
+          <!-- Make entire card clickable -->
           <a href="#" class="absolute inset-0 z-0"></a>
 
           <!-- Main Content -->
@@ -56,22 +57,20 @@
               </div>
             </div>
 
-            <!-- Buttons -->
+            <!-- Buttons (re-enable pointer events for this section) -->
             <div class="flex justify-end pointer-events-auto mt-3">
-            <div class="inline-flex gap-3 text-sm">
-              <a href="#"
-                 class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium">
-                ✏️ Update
-              </a>
-              <button type="button"
-                      @click="showModal = true; actionUrl = '{% url 'delete_bill' business.slug bill.uuid %}'"
-                      class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium">
-                🗑 Delete
-              </button>
+              <div class="inline-flex gap-3 text-sm">
+                <a href="#"
+                   class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium">
+                  ✏️ Update
+                </a>
+                <button type="button"
+                        @click="showModal = true; actionUrl = '{% url 'delete_bill' business.slug bill.uuid %}'"
+                        class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium">
+                  🗑 Delete
+                </button>
+              </div>
             </div>
-          </div>
-
-
           </div>
         </div>
         {% endfor %}
@@ -81,9 +80,10 @@
     {% endif %}
   </div>
 
-  <!-- Delete Confirmation Modal -->
+  <!-- Delete Confirmation Modal (IN scope of x-data) -->
   <div x-show="showModal"
        x-cloak
+       x-transition.opacity
        class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
       <div class="flex items-center gap-3 mb-3">

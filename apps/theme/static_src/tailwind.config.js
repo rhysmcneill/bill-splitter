@@ -41,6 +41,9 @@ module.exports = {
          */
         // '../../**/*.py'
     ],
+      safelist: [
+        '[x-cloak]',
+    ],
     theme: {
         extend: {},
     },

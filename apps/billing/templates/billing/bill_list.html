@@ -2,7 +2,7 @@
 {% block title %}Bills - dividr.{% endblock %}
 
 {% block content %}
-<!-- Root Alpine.js scope -->
+<!-- Root Alpine scope -->
 <div x-data="{ showModal: false, actionUrl: '' }" x-init="showModal = false">
 
   <div class="max-w-5xl mx-auto px-4 py-10">
@@ -20,7 +20,7 @@
     {% if messages %}
       {% for message in messages %}
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
-          {{ message | safe }}
+          {{ message|safe }}
         </div>
       {% endfor %}
     {% endif %}
@@ -28,51 +28,56 @@
     {% if bills %}
       <div class="space-y-4">
         {% for bill in bills %}
-        <div class="relative group hover:shadow-md transition rounded-lg border bg-white p-4 overflow-hidden">
-          <!-- Make entire card clickable -->
-          <a href="#" class="absolute inset-0 z-0"></a>
+          <div class="relative group hover:shadow-md transition rounded-lg border bg-white p-4 overflow-hidden">
+            <a href="#" class="absolute inset-0 z-0"></a>
 
-          <!-- Main Content -->
-          <div class="relative z-10 pointer-events-none">
-            <div class="flex justify-between items-center mb-2">
-              <div>
-                <p class="text-lg font-semibold text-gray-800">Table {{ bill.table_number }}</p>
-                <p class="text-sm text-gray-500">{{ bill.created_at|date:"M d, Y" }} {{ bill.created_at|time:"H:i" }}</p>
+            <!-- Main Content -->
+            <div class="relative z-10 pointer-events-none">
+              <div class="flex justify-between items-center mb-2">
+                <div>
+                  <p class="text-lg font-semibold text-gray-800">Table {{ bill.table_number }}</p>
+                  <p class="text-sm text-gray-500">{{ bill.created_at|date:"M d, Y" }} {{ bill.created_at|time:"H:i" }}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                  {% if bill.status == 'paid' %}bg-green-100 text-green-700
+                  {% elif bill.status == 'partial' or bill.status == 'partial_paid' %}bg-yellow-100 text-yellow-700
+                  {% else %}bg-red-100 text-red-700{% endif %}">
+                  {{ bill.get_status_display }}
+                </span>
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-semibold
-                {% if bill.status == 'paid' %}bg-green-100 text-green-700
-                {% elif bill.status == 'partial' or bill.status == 'partial_paid' %}bg-yellow-100 text-yellow-700
-                {% else %}bg-red-100 text-red-700{% endif %}">
-                {{ bill.get_status_display }}
-              </span>
-            </div>
 
-            <div class="text-sm text-gray-700 mb-2">
-              💷 <strong>£{{ bill.total_paid }}</strong> of <strong>£{{ bill.total_due }}</strong> paid
-            </div>
-
-            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden mb-3">
-              <div class="h-full bg-blue-500 rounded-full transition-all duration-700 ease-out"
-                   style="width: {{ bill.progress_pct|floatformat:2 }}%;">
+              <div class="text-sm text-gray-700 mb-2">
+                💷 <strong>£{{ bill.total_paid }}</strong> of <strong>£{{ bill.total_due }}</strong> paid
               </div>
-            </div>
 
-            <!-- Buttons (re-enable pointer events for this section) -->
-            <div class="flex justify-end pointer-events-auto mt-3">
-              <div class="inline-flex gap-3 text-sm">
-                <a href="#"
-                   class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium">
-                  ✏️ Update
-                </a>
-                <button type="button"
-                        @click="showModal = true; actionUrl = '{% url 'delete_bill' business.slug bill.uuid %}'"
-                        class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium">
-                  🗑 Delete
-                </button>
+              <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden mb-3">
+                <div class="h-full bg-blue-500 rounded-full transition-all duration-700 ease-out"
+                     style="width: {{ bill.progress_pct|floatformat:2 }}%;">
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex justify-end pointer-events-auto mt-3">
+                <div class="inline-flex gap-3 text-sm">
+                  <!-- Update Button via HTMX -->
+                  <button
+                    hx-get="{% url 'update_bill' business.slug bill.uuid %}"
+                    hx-target="#update-modal-container"
+                    hx-swap="innerHTML"
+                    class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium">
+                    ✏️ Update
+                  </button>
+
+                  <!-- Delete Button -->
+                  <button type="button"
+                          @click="showModal = true; actionUrl = '{% url 'delete_bill' business.slug bill.uuid %}'"
+                          class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium">
+                    🗑 Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
         {% endfor %}
       </div>
     {% else %}
@@ -80,7 +85,7 @@
     {% endif %}
   </div>
 
-  <!-- Delete Confirmation Modal (IN scope of x-data) -->
+  <!-- Delete Confirmation Modal -->
   <div x-show="showModal"
        x-cloak
        x-transition.opacity
@@ -114,4 +119,7 @@
   </div>
 
 </div>
+
+<!-- HTMX Target -->
+<div id="update-modal-container"></div>
 {% endblock %}

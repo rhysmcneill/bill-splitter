@@ -10,7 +10,7 @@
 
     <div class="space-y-2 text-sm text-gray-700 mb-4">
       <div><strong>Table Number:</strong> {{ bill.table_number }}</div>
-      <div><strong>Status: </strong><span class="px-2 py-1 rounded text-xs font-semibold {% status_badge_class bill.status %}">{{ bill.get_status_display }}</span></div>
+      <div><strong>Status: </strong><span class="px-2 py-1 rounded-full text-xs font-semibold {% status_badge_class bill.status %}">{{ bill.get_status_display }}</span></div>
       <div><strong>Total Paid:</strong> £{{ bill.total_paid|floatformat:2 }}</div>
       <div><strong>Total Due:</strong> £{{ bill.total_due|floatformat:2 }}</div>
       <div><strong>Created:</strong> {{ bill.created_at|date:"M d, Y" }} at {{ bill.created_at|time:"H:i" }}</div>

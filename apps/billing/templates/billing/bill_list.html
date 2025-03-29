@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Bills - dividr.{% endblock %}
+{% load status_badge %}
 
 {% block content %}
 <!-- Root Alpine scope -->
@@ -41,10 +42,7 @@
                   <p class="text-lg font-semibold text-gray-800">Table {{ bill.table_number }}</p>
                   <p class="text-sm text-gray-500">{{ bill.created_at|date:"M d, Y" }} {{ bill.created_at|time:"H:i" }}</p>
                 </div>
-                <span class="px-3 py-1 rounded-full text-xs font-semibold
-                  {% if bill.status == 'paid' %}bg-green-100 text-green-700
-                  {% elif bill.status == 'partial' or bill.status == 'partial_paid' %}bg-yellow-100 text-yellow-700
-                  {% else %}bg-red-100 text-red-700{% endif %}">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold {% status_badge_class bill.status %}">
                   {{ bill.get_status_display }}
                 </span>
               </div>

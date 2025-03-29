@@ -33,17 +33,20 @@ def create_bill_view(request, business_slug):
         if form.is_valid():
             bill = form.save(commit=False)
             bill.business = business
+            bill.save()
+
             BillItemFormSet = get_bill_item_formset(creating_new=True)
-            formset = BillItemFormSet(request.POST or None)
+            formset = BillItemFormSet(request.POST, instance=bill)
 
             if formset.is_valid():
-                bill.save()
                 items = formset.save(commit=False)
                 for item in items:
                     item.business = business
+                    item.bill = bill
                     item.save()
+
                 formset.save_m2m()
-                messages.success(request, "The bill was created successfully! 🎉")
+                messages.success(request, f"The bill was created successfully for table {bill.table_number}! 🎉")
                 return redirect('list_bill', business_slug=business.slug)
         else:
             BillItemFormSet = get_bill_item_formset(creating_new=True)
@@ -54,7 +57,7 @@ def create_bill_view(request, business_slug):
         BillItemFormSet = get_bill_item_formset(creating_new=True)
         formset = BillItemFormSet(instance=bill)
 
-    return render(request, 'billing/create_bill.html', {
+    return render(request, 'billing/bill_create.html', {
         'form': form,
         'formset': formset
     })
@@ -117,5 +120,27 @@ def update_bill_view(request, business_slug, uuid):
         'form': form,
         'formset': formset,
         'bill': bill,
+    })
+
+@login_required
+@business_required
+def view_bill_view(request, business_slug, uuid):
+    business = request.business
+    bills = Bill.objects.filter(business=business)
+    try:
+        bill = Bill.objects.get(uuid=uuid, business=request.business)
+    except Bill.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    if bill.business != request.user.business:
+        return render(request, 'core/error/403.html', status=403)
+
+    # Calculate totals only for this bill
+    bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
+    bill.total_due = bill.total_amount
+
+    return render(request, 'billing/bill_view.html', {
+        'bill': bill,
+        'items': bill.items.all()
     })
 

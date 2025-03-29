@@ -1,3 +1,4 @@
+// This allows adding, deleting and deletion confirmation of the update billing form.
 function itemFormset() {
   return {
     showDeleteItemModal: false,

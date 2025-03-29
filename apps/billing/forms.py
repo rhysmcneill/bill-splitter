@@ -17,6 +17,14 @@ BillItemFormSet = inlineformset_factory(
     Bill,
     BillItem,
     fields=['name', 'price'],
-    extra=1,
+    extra = 1,
     can_delete=True
 )
+
+class UpdateBillForm(forms.ModelForm):
+    class Meta:
+        model = Bill
+        fields = ['table_number', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 2}),
+        }

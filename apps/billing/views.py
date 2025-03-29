@@ -135,9 +135,9 @@ def view_bill_view(request, business_slug, uuid):
     if bill.business != request.user.business:
         return render(request, 'core/error/403.html', status=403)
 
-    for bill in bills:
-        bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
-        bill.total_due = bill.total_amount
+    # Calculate totals only for this bill
+    bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
+    bill.total_due = bill.total_amount
 
     return render(request, 'billing/bill_view.html', {
         'bill': bill,

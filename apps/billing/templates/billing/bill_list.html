@@ -9,7 +9,7 @@
 
     <!-- Header + Back -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-blue-500">Your Bills</h1>
+      <h1 class="text-3xl font-bold text-blue-500">Bills</h1>
       <a href="{% url 'business_dashboard' business.slug %}"
          class="px-4 py-2 bg-blue-100 text-gray-600 text-sm font-medium rounded hover:bg-blue-200 transition">
         ← Back to Dashboard
@@ -28,8 +28,11 @@
     {% if bills %}
       <div class="space-y-4">
         {% for bill in bills %}
-          <div class="relative group hover:shadow-md transition rounded-lg border bg-white p-4 overflow-hidden">
-            <a href="#" class="absolute inset-0 z-0"></a>
+          <div class="relative group hover:shadow-md transition rounded-lg border bg-white p-4 overflow-hidden cursor-pointer">
+            <a hx-get="{% url 'view_bill' business.slug bill.uuid %}"
+               hx-target="#view-modal-container"
+               hx-swap="innerHTML"
+               class="absolute inset-0 z-0"></a>
 
             <!-- Main Content -->
             <div class="relative z-10 pointer-events-none">
@@ -122,4 +125,6 @@
 
 <!-- HTMX Target -->
 <div id="update-modal-container"></div>
+<!-- HTMX Target for View Bill Modal -->
+<div id="view-modal-container"></div>
 {% endblock %}

@@ -26,6 +26,50 @@
       {% endfor %}
     {% endif %}
 
+    <!-- Filter Controls Wrapper -->
+    <div class="max-w-5xl mx-auto mb-6">
+      <form method="get" class="flex flex-wrap items-center gap-3 text-sm">
+        <select name="status" class="border rounded px-3 py-2 text-sm w-full md:w-auto">
+          <option value="">All</option>
+          <option value="unpaid" {% if request.GET.status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+          <option value="partial" {% if request.GET.status == 'partial' %}selected{% endif %}>Partially Paid</option>
+          <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Paid</option>
+        </select>
+
+        <input type="text" name="table" placeholder="Table #" value="{{ request.GET.table }}"
+               class="border rounded px-3 py-2 text-sm w-full md:w-32" />
+
+        <input type="number" step="0.01" name="min_total" placeholder="Min £" value="{{ request.GET.min_total }}"
+               class="border rounded px-3 py-2 text-sm w-full md:w-24" />
+        <input type="number" step="0.01" name="max_total" placeholder="Max £" value="{{ request.GET.max_total }}"
+               class="border rounded px-3 py-2 text-sm w-full md:w-24" />
+
+        <input type="date" name="start_date" value="{{ request.GET.start_date }}"
+               class="border rounded px-3 py-2 text-sm w-full md:w-auto" />
+        <input type="date" name="end_date" value="{{ request.GET.end_date }}"
+               class="border rounded px-3 py-2 text-sm w-full md:w-auto" />
+
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button type="submit"
+                  class="bg-blue-500 text-white px-4 py-2 text-sm rounded hover:bg-blue-600 w-full md:w-auto">
+            Filter
+          </button>
+          <a href="{% url 'list_bill' business.slug %}"
+             class="text-sm text-gray-500 hover:text-gray-700 underline w-full md:w-auto text-center">
+            Clear Filters
+          </a>
+        </div>
+      </form>
+    </div>
+
+
+
+    <!-- Quick Stats -->
+    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded text-sm font-medium mb-4">
+      📊 You have <strong>{{ unpaid_count }}</strong> unpaid bill{{ unpaid_count|pluralize }} totalling <strong>£{{ unpaid_total|floatformat:2 }}</strong>
+    </div>
+
+    <!-- Bill Cards -->
     {% if bills %}
       <div class="space-y-4">
         {% for bill in bills %}
@@ -82,7 +126,11 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="text-gray-500 text-lg">Oops! It looks like there are no bills created yet.</p>
+      {% if filters_applied %}
+        <p class="text-gray-500 text-lg">Oops! It looks like there are no bills matching these filters.</p>
+      {% else %}
+        <p class="text-gray-500 text-lg">Oops! It looks like there are no bills created yet.</p>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -123,6 +171,5 @@
 
 <!-- HTMX Target -->
 <div id="update-modal-container"></div>
-<!-- HTMX Target for View Bill Modal -->
 <div id="view-modal-container"></div>
 {% endblock %}

@@ -7,20 +7,61 @@ from django.contrib import messages
 from .models import Bill, Payment
 from .helpers.formset import get_bill_item_formset
 
+
 @login_required
 @business_required
 def list_bill_view(request, business_slug):
     business = request.business
-    bills = Bill.objects.filter(business=business).order_by('-created_at')
+    bills = Bill.objects.filter(business=business)
 
+    # Apply filters
+    status = request.GET.get('status')
+    table = request.GET.get('table')
+    min_total = request.GET.get('min_total')
+    max_total = request.GET.get('max_total')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if status:
+        bills = bills.filter(status=status)
+    if table:
+        bills = bills.filter(table_number__icontains=table)
+    if start_date:
+        bills = bills.filter(created_at__date__gte=start_date)
+    if end_date:
+        bills = bills.filter(created_at__date__lte=end_date)
+    if table:
+        bills = bills.filter(table_number=table)
+
+    # Calculate total_paid and total_due per bill (in Python)
     for bill in bills:
         bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
-        bill.total_due = bill.total_amount
+        bill.total_due = sum(i.price for i in bill.items.all())
+
+    # Filter by total price after computing it
+    if min_total:
+        bills = [b for b in bills if b.total_due >= float(min_total)]
+    if max_total:
+        bills = [b for b in bills if b.total_due <= float(max_total)]
+
+    # Quick stats
+    unpaid_bills = [b for b in bills if b.status == 'unpaid']
+    unpaid_count = len(unpaid_bills)
+    unpaid_total = sum(b.total_due for b in unpaid_bills)
+
+    filters_applied = any(
+        param in request.GET for param in ['status', 'table', 'min_total', 'max_total', 'start_date', 'end_date']
+    )
 
     return render(request, 'billing/bill_list.html', {
         'bills': bills,
-        'business': business
+        'business': business,
+        'unpaid_count': unpaid_count,
+        'unpaid_total': unpaid_total,
+        'filters_applied': filters_applied,
     })
+
+
 
 
 @login_required

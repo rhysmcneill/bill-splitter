@@ -1,0 +1,64 @@
+    <!-- Filter Controls Wrapper -->
+    <div x-data="{ showFilters: {{ filters_applied|yesno:'true,false' }} }"
+         class="max-w-7xl mx-auto mb-6">
+
+      <!-- Toggle Button -->
+      <div class="mb-4">
+        <button @click="showFilters = !showFilters"
+                class="flex items-center gap-2 bg-blue-100 text-gray-600 px-4 py-2 rounded hover:bg-blue-200 transition font-medium w-fit">
+          <svg :class="{ 'rotate-180': showFilters }"
+               class="w-4 h-4 transition-transform duration-300 ease-in-out transform"
+               fill="none" stroke="currentColor" stroke-width="2"
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+          <span x-text="showFilters ? 'Hide Filters' : 'Show Filters'"></span>
+        </button>
+      </div>
+
+      <!-- Filter Form -->
+      <div
+        class="transition-opacity duration-500 ease-in-out"
+        x-show="showFilters"
+        x-transition
+        x-cloak
+      >
+
+        <form method="get" class="rounded-lg shadow-sm p-4 border bg-gray-50">
+
+          <div class="flex flex-col lg:flex-row lg:flex-nowrap gap-2">
+
+            <select name="status" class="border rounded px-3 py-2 text-sm w-full lg:w-40">
+              <option value="">All</option>
+              <option value="unpaid" {% if request.GET.status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+              <option value="partial" {% if request.GET.status == 'partial' %}selected{% endif %}>Partially Paid</option>
+              <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Paid</option>
+            </select>
+
+            <input type="text" name="table" placeholder="Table #" value="{{ request.GET.table }}"
+                   class="border rounded px-3 py-2 text-sm w-full lg:w-32" />
+
+            <input type="number" step="0.01" name="min_total" placeholder="Min £" value="{{ request.GET.min_total }}"
+                   class="border rounded px-3 py-2 text-sm w-full lg:w-24" />
+            <input type="number" step="0.01" name="max_total" placeholder="Max £" value="{{ request.GET.max_total }}"
+                   class="border rounded px-3 py-2 text-sm w-full lg:w-24" />
+
+            <input type="date" name="start_date" value="{{ request.GET.start_date }}"
+                   class="border rounded px-3 py-2 text-sm w-full lg:w-40" />
+            <input type="date" name="end_date" value="{{ request.GET.end_date }}"
+                   class="border rounded px-3 py-2 text-sm w-full lg:w-40" />
+
+            <div class="flex gap-2 w-full lg:w-auto items-center">
+              <button type="submit"
+                      class="bg-blue-500 text-white px-4 py-2 text-sm rounded hover:bg-blue-600 w-full lg:w-auto">
+                Filter
+              </button>
+              <a href="{% url 'list_bill' business.slug %}"
+                 class="text-sm text-gray-500 hover:text-gray-700 underline text-center w-full lg:w-auto self-center">
+                Clear Filters
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>

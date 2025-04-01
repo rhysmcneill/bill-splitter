@@ -6,13 +6,14 @@ from .forms import BillForm, BillItemFormSet
 from django.contrib import messages
 from .models import Bill, Payment
 from .helpers.formset import get_bill_item_formset
+from .helpers.pagination import paginate_queryset
 
 
 @login_required
 @business_required
 def list_bill_view(request, business_slug):
     business = request.business
-    bills = Bill.objects.filter(business=business)
+    bills = Bill.objects.filter(business=business).order_by('-created_at')
 
     # Apply filters
     status = request.GET.get('status')
@@ -33,7 +34,7 @@ def list_bill_view(request, business_slug):
     if table:
         bills = bills.filter(table_number=table)
 
-    # Calculate total_paid and total_due per bill (in Python)
+    # Calculate total_paid and total_due per bill
     for bill in bills:
         bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
         bill.total_due = sum(i.price for i in bill.items.all())
@@ -53,12 +54,19 @@ def list_bill_view(request, business_slug):
         param in request.GET for param in ['status', 'table', 'min_total', 'max_total', 'start_date', 'end_date']
     )
 
+    # Pagination
+    per_page = int(request.GET.get('per_page', 5))  # default to 5
+    page_obj, querystring = paginate_queryset(request, bills, per_page=per_page)
+
     return render(request, 'billing/bill_list.html', {
-        'bills': bills,
+        'bills': page_obj.object_list,
         'business': business,
         'unpaid_count': unpaid_count,
         'unpaid_total': unpaid_total,
         'filters_applied': filters_applied,
+        'page_obj': page_obj,
+        'querystring': querystring,
+        'per_page': per_page,
     })
 
 

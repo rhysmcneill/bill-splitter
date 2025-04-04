@@ -44,7 +44,11 @@
         Status: <strong class="text-red-600">Stripe Not Connected</strong>
       </span>
       {% endif %}
-      <a href="#" class="text-blue-500 hover:underline text-sm font-medium text-right">Manage Connection</a>
+      {% if business.stripe_account_id %}
+        <a href="{% url 'manage_stripe' business.slug %}" class="text-blue-500 hover:underline text-sm font-medium text-right">Manage Stripe Account</a>
+      {% else %}
+        <a href="{% url 'connect_stripe' business.slug %}" class="text-blue-500 hover:underline text-sm font-medium text-right">Connect with Stripe</a>
+      {% endif %}
     </div>
   </div>
 

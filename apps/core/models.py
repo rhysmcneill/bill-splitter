@@ -1,10 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
 
 
 class Business(models.Model):
     name = models.CharField(max_length=100)
     slug = models.CharField(max_length=100, unique=True)
+
+    # Contact & Location
+    address = models.TextField(blank=True, null=True)  # Optional: or split into street, city, postcode
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    # Timestamps
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # Business payment configuration
     payment_method = models.CharField(

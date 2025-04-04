@@ -19,6 +19,26 @@ def dashboard_view(request, business_slug):
     })
 
 
+@login_required
+@business_required
+def business_settings_view(request, slug):
+    try:
+        business = Business.objects.get(slug=slug)
+    except Business.DoesNotExist:
+        return render(request, 'core/error/404.html', {
+            'message': "Business not found."
+        }, status=404)
+
+    if business != request.business:
+        return render(request, 'core/error/403.html', {
+            'message': "You don’t have permission to access this business’s settings."
+        }, status=403)
+
+    return render(request, 'core/settings.html', {
+        'business': business,
+    })
+
+
 def landing_view(request):
     # Session-aware redirect
     if request.user.is_authenticated and getattr(request, 'business', None):

@@ -77,6 +77,10 @@ def list_bill_view(request, business_slug):
 def create_bill_view(request, business_slug):
     business = request.business
 
+    if not business.stripe_account_id:
+        messages.error(request, "You need to set up a Stripe account before creating bills.")
+        return redirect('business_settings', business_slug=business.slug)
+
     if request.method == 'POST':
         form = BillForm(request.POST)
         if form.is_valid():

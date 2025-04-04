@@ -38,10 +38,16 @@ class Business(models.Model):
 
 
 class CustomUser(AbstractUser):
-    # Business User
     business = models.ForeignKey(Business, on_delete=models.CASCADE, null=True, blank=True)
+
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('staff', 'Staff'),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='staff')
 
     def __str__(self):
         return self.username
+
 
 

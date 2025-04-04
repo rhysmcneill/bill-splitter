@@ -2,11 +2,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect
-from .forms import BusinessSignupForm, BusinessLoginForm
+from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm
 from .models import CustomUser, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
-from django.http import HttpResponseForbidden
 from .decorators import business_required
 
 
@@ -16,6 +15,59 @@ def dashboard_view(request, business_slug):
     business = request.business
     return render(request, 'core/dashboard.html', {
         'business': business
+    })
+
+
+@login_required
+@business_required
+def business_settings_view(request, slug):
+    try:
+        business = Business.objects.get(slug=slug)
+    except Business.DoesNotExist:
+        return render(request, 'core/error/404.html', {
+            'message': "Business not found."
+        }, status=404)
+
+    if business != request.business:
+        return render(request, 'core/error/403.html', {
+            'message': "You don’t have permission to access this business’s settings."
+        }, status=403)
+
+    return render(request, 'core/settings.html', {
+        'business': business,
+    })
+
+
+@login_required
+@business_required
+def update_business_info_view(request, slug):
+    try:
+        business = Business.objects.get(slug=slug)
+    except Business.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    if business != request.business:
+        return render(request, 'core/error/403.html', status=403)
+
+    if request.method == 'POST':
+        form = BusinessInfoForm(request.POST, instance=business)
+        if form.is_valid():
+            print("PHONE FROM FORM:", form.cleaned_data['phone_number'])  # 🔍 debug here
+            form.save()
+            messages.success(request, "Business details were updated successfully ✅")
+            return redirect('business_settings', slug=slug)
+        else:
+            # Return partial with errors (form stays open)
+            return render(request, 'core/partials/_update_business.html', {
+                'form': form,
+                'business': business,
+            }, status=400)  # Helps HTMX detect error
+    else:
+        form = BusinessInfoForm(instance=business)
+
+    return render(request, 'core/partials/_update_business.html', {
+        'form': form,
+        'business': business,
     })
 
 

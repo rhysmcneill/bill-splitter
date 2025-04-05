@@ -2,7 +2,7 @@ import stripe
 from django.conf import settings
 from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.decorators import login_required
-from core.decorators import business_required
+from core.decorators import business_required, admin_required
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.publish_key = settings.STRIPE_PUBLISHABLE_KEY
@@ -10,6 +10,7 @@ stripe.publish_key = settings.STRIPE_PUBLISHABLE_KEY
 
 @login_required
 @business_required
+@admin_required
 def connect_stripe_view(request, slug):
     business = request.business
 
@@ -44,6 +45,7 @@ def connect_stripe_view(request, slug):
 
 @login_required
 @business_required
+@admin_required
 def manage_stripe_account_view(request, slug):
     business = request.business
 

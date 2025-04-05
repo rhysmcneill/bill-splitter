@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect
 from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm
-from .models import CustomUser, Business
+from .models import CustomUser as User, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
-from .decorators import business_required
+from .decorators import business_required, admin_required
 
 
 @business_required
@@ -24,17 +24,32 @@ def business_settings_view(request, slug):
     try:
         business = Business.objects.get(slug=slug)
     except Business.DoesNotExist:
-        return render(request, 'core/error/404.html', {
-            'message': "Business not found."
-        }, status=404)
+        return render(request, 'core/error/404.html', status=404)
 
     if business != request.business:
-        return render(request, 'core/error/403.html', {
-            'message': "You don’t have permission to access this business’s settings."
-        }, status=403)
+        return render(request, 'core/error/403.html', status=403)
 
     return render(request, 'core/settings.html', {
         'business': business,
+    })
+
+
+@login_required
+@business_required
+def team_management_view(request, slug):
+    try:
+        business = Business.objects.get(slug=slug)
+    except Business.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    if business != request.business:
+        return render(request, 'core/error/403.html', status=403)
+
+    team_members = User.objects.filter(business=business)
+
+    return render(request, 'core/team.html', {
+        'business': business,
+        'team_members': team_members,
     })
 
 
@@ -52,7 +67,6 @@ def update_business_info_view(request, slug):
     if request.method == 'POST':
         form = BusinessInfoForm(request.POST, instance=business)
         if form.is_valid():
-            print("PHONE FROM FORM:", form.cleaned_data['phone_number'])  # 🔍 debug here
             form.save()
             messages.success(request, "Business details were updated successfully ✅")
             return redirect('business_settings', slug=slug)
@@ -125,7 +139,7 @@ class LoginView(View):
             if user is None:
                 try:
                     business = Business.objects.get(slug=identifier)
-                    user = CustomUser.objects.filter(business=business).first()
+                    user = User.objects.filter(business=business).first()
                     if user:
                         user = authenticate(request, username=user.username, password=password)
                 except Business.DoesNotExist:

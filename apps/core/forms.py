@@ -1,13 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Business
+from .models import CustomUser as User, Business
 
 class BusinessSignupForm(UserCreationForm):
     business_name = forms.CharField(max_length=100)
 
     class Meta:
-        model = CustomUser
-        fields = ['username', 'password1', 'password2', 'business_name']
+        model = User
+        fields = ['username', 'email', 'password1', 'password2', 'business_name']
 
 
 class BusinessLoginForm(forms.Form):

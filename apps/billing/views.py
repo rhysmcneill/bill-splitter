@@ -70,12 +70,15 @@ def list_bill_view(request, business_slug):
     })
 
 
-
-
 @login_required
 @business_required
 def create_bill_view(request, business_slug):
     business = request.business
+
+    if not business.stripe_account_id:
+        messages.error(request, "❌ You need to set up a Stripe account before creating bills - Go to"
+                                " Business Settings and configure your Stripe account")
+        return redirect('business_dashboard', business_slug=business.slug)
 
     if request.method == 'POST':
         form = BillForm(request.POST)
@@ -124,6 +127,7 @@ def delete_bill_view(request, business_slug, uuid):
     bill.delete()
     return redirect('list_bill', business_slug=business_slug)
 
+
 @login_required
 @business_required
 def update_bill_view(request, business_slug, uuid):
@@ -171,6 +175,7 @@ def update_bill_view(request, business_slug, uuid):
         'bill': bill,
     })
 
+
 @login_required
 @business_required
 def view_bill_view(request, business_slug, uuid):
@@ -192,4 +197,3 @@ def view_bill_view(request, business_slug, uuid):
         'bill': bill,
         'items': bill.items.all()
     })
-

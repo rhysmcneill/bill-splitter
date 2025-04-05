@@ -22,5 +22,5 @@ urlpatterns = [
     path('', include('core.urls')),
     path('', include('billing.urls')),
     path('', include('payment.urls')),
-    path('', lambda request: redirect('login', permanent=False))
+    path('', lambda request: redirect('login', permanent=False)),
 ]

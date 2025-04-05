@@ -18,56 +18,51 @@
       <span class="text-lg text-gray-500">Business: <strong>{{ business.name }}</strong></span>
     </div>
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
-          {{ message | safe }}
-        </div>
-      {% endfor %}
-    {% endif %}
+  <!-- Include messages -->
+  {% include "core/partials/_messages.html" %}
 
-<div class="grid gap-4 md:grid-cols-2">
-  <!-- Card 1 -->
-  <div class="p-6 bg-white rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-2">Your Bills</h2>
-    <p class="text-gray-600">Track and manage all active and past bills.</p>
-    <a href="{% url 'list_bill' current_business.slug %}" class="mt-4 inline-block text-blue-500 hover:underline">View Bills</a>
-  </div>
-
-  <!-- Card 2 -->
-  <div class="p-6 bg-white rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-2">Create New Bill</h2>
-    <p class="text-gray-600">Start a new bill for a table and generate a QR code.</p>
-    <a href="{% url 'create_bill' current_business.slug %}" class="mt-4 inline-block text-blue-500 hover:underline">Create Bill</a>
-  </div>
-
-  <!-- Card 3: Full width below -->
-  <div class="md:col-span-2 p-6 bg-white rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center">
-    <!-- Left Section: Info and CTA -->
-    <div>
-      <h2 class="text-xl font-semibold mb-1">Business Settings</h2>
-      <p class="text-gray-600 text-sm">Manage your payment methods and team settings.</p>
-      <a href="{% url 'business_settings' current_business.slug %}"
-         class="mt-3 inline-block text-blue-500 hover:underline text-sm">
-        Go to Settings
-      </a>
+  <div class="grid gap-4 md:grid-cols-2">
+    <!-- Card 1 -->
+    <div class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Your Bills</h2>
+      <p class="text-gray-600">Track and manage all active and past bills.</p>
+      <a href="{% url 'list_bill' current_business.slug %}" class="mt-4 inline-block text-blue-500 hover:underline">View Bills</a>
     </div>
 
-    <!-- Right Section: Stripe Status -->
-    <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end text-sm">
-      {% if business.stripe_account_id %}
-        <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 font-medium rounded-full mb-1">
-          Stripe Connected
-        </span>
-      {% else %}
-        <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 font-medium rounded-full mb-1">
-          Not Connected to Stripe
-        </span>
-      {% endif %}
+    <!-- Card 2 -->
+    <div class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Create New Bill</h2>
+      <p class="text-gray-600">Start a new bill for a table and generate a QR code.</p>
+      <a href="{% url 'create_bill' current_business.slug %}" class="mt-4 inline-block text-blue-500 hover:underline">Create Bill</a>
     </div>
-  </div>
 
+    <!-- Card 3: Full width below -->
+    <div class="md:col-span-2 p-6 bg-white rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center">
+      <!-- Left Section: Info and CTA -->
+      <div>
+        <h2 class="text-xl font-semibold mb-1">Business Settings</h2>
+        <p class="text-gray-600 text-sm">Manage your payment methods and team settings.</p>
+        <a href="{% url 'business_settings' current_business.slug %}"
+           class="mt-3 inline-block text-blue-500 hover:underline text-sm">
+          Go to Settings
+        </a>
+      </div>
+
+      <!-- Right Section: Stripe Status -->
+      <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end text-sm">
+        {% if business.stripe_account_id %}
+          <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 font-medium rounded-full mb-1">
+            Stripe Connected
+          </span>
+        {% else %}
+          <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 font-medium rounded-full mb-1">
+            Not Connected to Stripe
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    </div>
   </div>
 </div>
 {% endblock %}
-</div>

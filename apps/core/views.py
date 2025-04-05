@@ -36,7 +36,6 @@ def business_settings_view(request, slug):
 
 @login_required
 @business_required
-@admin_required
 def team_management_view(request, slug):
     try:
         business = Business.objects.get(slug=slug)

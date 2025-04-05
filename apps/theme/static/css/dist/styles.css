@@ -1675,6 +1675,14 @@ select {
   padding-left: 2rem;
 }
 
+.pl-6 {
+  padding-left: 1.5rem;
+}
+
+.pl-3 {
+  padding-left: 0.75rem;
+}
+
 .text-left {
   text-align: left;
 }

@@ -59,15 +59,17 @@
 
       <!-- Right Section: Stripe Status -->
       <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end text-sm">
-        {% if request.user.role == 'admin' or request.user.role == 'business_owner' and business.stripe_account_id %}
+      {% if request.user.role == 'admin' or request.user.role == 'business_owner' %}
+        {% if business.stripe_account_id %}
           <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 font-medium rounded-full mb-1">
             Stripe Connected
           </span>
-        {% elif request.user.role == 'admin' or request.user.role == 'business_owner' and not business.stripe_account_id %}
+        {% else %}
           <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 font-medium rounded-full mb-1">
             Not Connected to Stripe
           </span>
         {% endif %}
+      {% endif %}
       </div>
     </div>
 

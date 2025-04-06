@@ -4,80 +4,20 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-10 space-y-6">
 
-  <h1 class="text-3xl font-bold text-blue-500 mb-6">Business Settings</h1>
+      <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-blue-500">Business Settings</h1>
+      <a href="{% url 'business_dashboard' business.slug %}"
+         class="px-4 py-2 bg-blue-100 text-gray-600 text-sm font-medium rounded hover:bg-blue-200 transition">
+        ← Back to Settings
+      </a>
+    </div>
 
   <!-- Include messages -->
   {% include "core/partials/_messages.html" %}
 
-  <!-- Business Info Card -->
-  <div id="business-info-card" class="relative bg-white rounded-2xl shadow p-6 pt-6">
-    <!-- Timestamps: Top-right always -->
-    <div class="absolute top-7 right-6 text-xs text-gray-500 text-right whitespace-nowrap">
-      <p><strong>Account Created:</strong> {{ business.created_at }}</p>
-      <p><strong>Last updated:</strong> {{ business.updated_at }}</p>
-    </div>
+  <!-- Include settings cards -->
+  {% include "core/partials/_settings_cards.html" %}
 
-    <h2 class="text-xl font-semibold mb-2">Business Information</h2>
-    <p class="text-gray-600 mb-4">View and manage your business details.</p>
-
-    <!-- Info Section -->
-    <div class="text-sm text-gray-700 space-y-1 mt-2">
-      <p><strong>Business Name:</strong> {{ business.name|default:"N/A" }}</p>
-      <p><strong>Address:</strong> {{ business.address|default:"N/A" }}</p>
-      <p><strong>Email:</strong> {{ business.email|default:"N/A" }}</p>
-      <p><strong>Phone:</strong> {{ business.phone_number|default:"N/A" }}</p>
-    </div>
-
-  <div class="mt-4 text-right">
-    {% if request.user.role == 'admin' %}
-      <a href="#"
-       hx-get="{% url 'update_business_info' business.slug %}"
-       hx-target="#update-business-modal-container"
-       hx-swap="beforeend"
-       class="text-blue-500 hover:underline text-sm font-medium">
-         Update Business Details
-      </a>
-    {% else %}
-      <p class="text-sm font-medium text-right text-gray-500 italic">Only admins can manage business details.</p>
-    {% endif %}
-  </div>
-
-  </div>
-
-  <!-- Payment Method Card -->
-  <div class="bg-white rounded-2xl shadow p-6">
-    <h2 class="text-xl font-semibold mb-2">Payment Method</h2>
-    <p class="text-gray-600 mb-4">Connect and manage payment providers.</p>
-    <div class="flex items-center justify-between">
-      {% if business.stripe_account_id %}
-      <span class="text-sm text-gray-700">
-        Status: <strong class="text-green-600">Stripe Connected</strong>
-      </span>
-      {% else %}
-      <span class="text-sm text-gray-700">
-        Status: <strong class="text-red-600">Stripe Not Connected</strong>
-      </span>
-      {% endif %}
-      {% if request.user.role == 'admin' %}
-        {% if business.stripe_account_id %}
-          <a href="{% url 'manage_stripe' business.slug %}" class="text-blue-500 hover:underline text-sm font-medium text-right">Manage Stripe Account</a>
-        {% else %}
-          <a href="{% url 'connect_stripe' business.slug %}" class="text-blue-500 hover:underline text-sm font-medium text-right">Connect with Stripe</a>
-        {% endif %}
-      {% else %}
-        <p class="text-sm font-medium text-right text-gray-500 italic">Only admins can manage Stripe.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Team Members Card -->
-  <div class="bg-white rounded-2xl shadow p-6">
-    <h2 class="text-xl font-semibold mb-2">Team Members</h2>
-    <p class="text-gray-600 mb-4">Invite and manage access to your business account.</p>
-    <div class="mt-4 text-right">
-      <a href="{% url 'team_management' business.slug %}" class="text-blue-500 hover:underline text-sm font-medium">Manage Team</a>
-    </div>
-  </div>
 
   <div id="update-business-modal-container"></div>
 </div>

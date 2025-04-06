@@ -1,0 +1,15 @@
+Hi there,
+
+You've been invited to join {{ business.name }} on Dividr! 🎉
+
+Login here:
+{{ login_url }}
+
+Your login credentials:
+Username: {{ user.username }}
+Temporary Password: {{ temp_password }}
+
+You'll be asked to change your password when you first log in.
+
+See you soon!
+The dividr Team

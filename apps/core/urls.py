@@ -1,13 +1,16 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from .views import dashboard_view, SignupView, LoginView, landing_view, business_settings_view, \
-    update_business_info_view, team_management_view
+    update_business_info_view, team_management_view, invite_team_member_view, force_password_change_view
 
 urlpatterns = [
     # Auth
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('signup/', SignupView.as_view(), name='signup'),
+    path('business/<slug:slug>/team/invite', invite_team_member_view, name='invite_team_member'),
+    path('password-change/', force_password_change_view, name='force_password_change'),
+
 
     # Dashboard
     path('business/<slug:business_slug>/', dashboard_view, name='business_dashboard'),

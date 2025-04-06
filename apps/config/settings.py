@@ -25,8 +25,16 @@ SECRET_KEY = 'django-insecure-_&dv^$#@j&be$z^+*hr)baol*cyyk1rt20hril@yf@)eujf2!w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+######## Update in PROD to a proper email server ######
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config('MAILTRAP_USER')
+EMAIL_HOST_PASSWORD = config('MAILTRAP_PASSWORD')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = '<no-reply@dividr.com>'
 
+ALLOWED_HOSTS = ['192.168.1.7', '127.0.0.1']  # TO-DO: Remove * when going to prod
 
 # Application definition
 AUTH_USER_MODEL = 'core.customUser'
@@ -61,7 +69,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.business_middleware.BusinessMiddleware'
+    'core.middleware.business_middleware.BusinessMiddleware',
+    "core.middleware.enforce_password_change.ForcePasswordChangeMiddleware",  # ← Add this!
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -121,7 +131,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -134,7 +143,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/

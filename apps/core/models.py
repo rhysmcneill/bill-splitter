@@ -41,10 +41,13 @@ class CustomUser(AbstractUser):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, null=True, blank=True)
 
     ROLE_CHOICES = [
+        ('business_owner', 'Owner'),
         ('admin', 'Admin'),
         ('staff', 'Staff'),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='staff')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
+
+    must_change_password = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username

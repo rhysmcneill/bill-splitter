@@ -22,7 +22,7 @@ def business_required(view_func):
 def admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != 'admin':
+        if not request.user.is_authenticated or request.user.role not in ['admin', 'business_owner']:
             return render(request, 'core/error/403.html', status=403)
         return view_func(request, *args, **kwargs)
     return _wrapped_view

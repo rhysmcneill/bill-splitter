@@ -80,6 +80,10 @@ def update_business_info_view(request, slug):
         'business': business,
     })
 
+
+#######################################
+#           Team views
+#######################################
 @login_required
 @business_required
 def team_management_view(request, slug):
@@ -97,6 +101,32 @@ def team_management_view(request, slug):
         'business': business,
         'team_members': team_members,
     })
+
+
+@login_required
+@business_required
+@admin_required
+def remove_team_member_view(request, slug, user_id):
+    business = request.business
+
+    try:
+        target_user = User.objects.get(id=user_id, business=business)
+    except User.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    if target_user == request.user:
+        messages.error(request, "⛔ You cannot remove yourself from the team.")
+        return redirect('team_management', slug=slug)
+
+    if target_user.role == 'business_owner' and request.user.role != 'business_owner':
+        messages.error(request, "⛔ Only the business owner(s) can remove this member.")
+        return redirect('team_management', slug=slug)
+
+    username = target_user.username
+    target_user.delete()
+
+    messages.success(request, f"✅ User {username} has been removed successfully.")
+    return redirect('team_management', slug=slug)
 
 
 #######################################

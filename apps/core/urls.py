@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LogoutView
 from .views import dashboard_view, SignupView, LoginView, landing_view, business_settings_view, \
     update_business_info_view, team_management_view, invite_team_member_view, force_password_change_view, \
-    remove_team_member_view
+    remove_team_member_view, change_user_role_view
 
 urlpatterns = [
     # Auth
@@ -14,7 +14,7 @@ urlpatterns = [
     path('business/<slug:slug>/team/invite', invite_team_member_view, name='invite_team_member'),
     path('password-change/', force_password_change_view, name='force_password_change'),
     path("business/<slug:slug>/team/<int:user_id>/remove/", remove_team_member_view, name="remove_team_member"),
-
+    path("business/<slug:slug>/team/<int:user_id>/change-role/", change_user_role_view, name="change_user_role"),
 
 
     # Dashboard

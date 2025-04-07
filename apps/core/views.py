@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect, reverse
-from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm, InviteUserForm
+from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm, InviteUserForm, ChangeRoleForm
 from .models import CustomUser as User, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -125,8 +125,68 @@ def remove_team_member_view(request, slug, user_id):
     username = target_user.username
     target_user.delete()
 
-    messages.success(request, f"✅ User {username} has been removed successfully.")
+    messages.success(request, f"User {username} has been removed successfully. ✅ ")
     return redirect('team_management', slug=slug)
+
+
+@login_required
+@business_required
+@admin_required
+def change_user_role_view(request, slug, user_id):
+    business = request.business
+
+    try:
+        target_user = User.objects.get(id=user_id, business=business)
+    except User.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    if target_user.business != request.business:
+        return render(request, 'core/error/403.html', status=403)
+
+    if request.method == 'POST':
+        form = ChangeRoleForm(request.POST, instance=target_user, current_user=request.user)
+
+        # Extra guard clause
+        if request.user.role == 'business_owner' and target_user.role == 'business_owner' and request.POST.get('role') != 'business_owner':
+            messages.error(request, "You cannot change the role of another Business Owner. 🚫")
+            return redirect('team_management', slug=business.slug)
+
+        if form.is_valid():
+            new_role = form.cleaned_data['role']
+
+            # Already has this role
+            if target_user.role == new_role:
+                messages.warning(request, f"{target_user.username} already has the role {target_user.get_role_display()}. ⚠️")
+                return redirect('team_management', slug=business.slug)
+
+            # Prevent demoting the last business owner
+            if target_user.role == 'business_owner' and new_role != 'business_owner':
+                remaining_owners = User.objects.filter(
+                    business=business,
+                    role='business_owner'
+                ).exclude(id=target_user.id)
+
+                if not remaining_owners.exists():
+                    messages.error(request, "You must have at least one Business Owner in the team. 🚫")
+                    return redirect('team_management', slug=business.slug)
+
+            form.save()
+            messages.success(request, f"{target_user.username}'s role was updated to {target_user.get_role_display()}. ✅")
+            return redirect('team_management', slug=business.slug)
+        else:
+            return render(request, 'core/partials/_change_role.html', {
+                'form': form,
+                'target_user': target_user,
+                'business': business,
+            }, status=400)
+
+    # GET request (return form in modal)
+    form = ChangeRoleForm(instance=target_user, current_user=request.user)
+    return render(request, 'core/partials/_change_role.html', {
+        'form': form,
+        'target_user': target_user,
+        'business': business,
+    })
 
 
 #######################################
@@ -221,7 +281,7 @@ def invite_team_member_view(request, slug):
 
             # Check if user already exists
             if User.objects.filter(email=email).exists():
-                messages.warning(request, f"{email} is already a member.")
+                messages.warning(request, f"{email} is already a member. ⚠️")
                 return redirect('team_management', slug=business.slug)
 
             # Create the new user

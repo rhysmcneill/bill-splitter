@@ -47,7 +47,13 @@
                 <a href="#" class="hover:underline">Update Profile</a>
               {% elif request.user.role == 'business_owner' %}
                 <!-- Owner managing other users -->
-                <a href="#" class="hover:underline">Change Role</a>
+               <a href="#"
+                  hx-get="{% url 'change_user_role' business.slug user.id %}"
+                  hx-target="#change-role-modal-container"
+                  hx-swap="beforeend"
+                  class="text-blue-500 hover:underline">Change Role
+               </a>
+
                 <span class="text-gray-300">|</span>
                 <a href="#"
                    @click.prevent="showModal = true; actionUrl = '{% url 'remove_team_member' business.slug user.id %}'"
@@ -56,8 +62,14 @@
                 </a>
 
               {% elif request.user.role == 'admin' and user.role != 'business_owner' %}
-                <!-- Admin managing non-owner users -->
-                <a href="#" class="hover:underline">Change Role</a>
+               <!-- Admin managing non-owner users -->
+               <a href="#"
+                  hx-get="{% url 'change_user_role' business.slug user.id %}"
+                  hx-target="#change-role-modal-container"
+                  hx-swap="beforeend"
+                  class="text-blue-500 hover:underline">Change Role
+               </a>
+
                 <span class="text-gray-300">|</span>
                 <a href="#"
                    @click.prevent="showModal = true; actionUrl = '{% url 'remove_team_member' business.slug user.id %}'"

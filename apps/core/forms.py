@@ -49,3 +49,38 @@ class InviteUserForm(forms.Form):
 
         self.fields['role'].choices = filtered_roles
 
+
+class ChangeRoleForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['role']
+
+    def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user', None)
+        self.target_user = kwargs.get('instance')
+        super().__init__(*args, **kwargs)
+
+        all_choices = self.fields['role'].choices
+
+        # Case 1: Admin – only allow 'admin' or 'staff'
+        if self.current_user.role == 'admin':
+            self.fields['role'].choices = [
+                (value, label)
+                for value, label in all_choices
+                if value in ['admin', 'staff']
+            ]
+
+        # Case 2: Owner modifying another owner – only allow 'business_owner'
+        elif (
+            self.current_user.role == 'business_owner'
+            and self.target_user.role == 'business_owner'
+        ):
+            self.fields['role'].choices = [
+                (value, label)
+                for value, label in all_choices
+                if value == 'business_owner'
+            ]
+
+        # Case 3: Owner modifying non-owner – allow all roles
+        else:
+            self.fields['role'].choices = all_choices

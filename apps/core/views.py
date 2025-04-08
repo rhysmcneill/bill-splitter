@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect, reverse
-from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm, InviteUserForm, ChangeRoleForm
+from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm, InviteUserForm, ChangeRoleForm, \
+     UpdateProfileForm
 from .models import CustomUser as User, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -115,17 +116,17 @@ def remove_team_member_view(request, slug, user_id):
         return render(request, 'core/error/404.html', status=404)
 
     if target_user == request.user:
-        messages.error(request, "⛔ You cannot remove yourself from the team.")
+        messages.error(request, "You cannot remove yourself from the team. ⛔")
         return redirect('team_management', slug=slug)
 
     if target_user.role == 'business_owner' and request.user.role != 'business_owner':
-        messages.error(request, "⛔ Only the business owner(s) can remove this member.")
+        messages.error(request, "Only the business owner(s) can remove this member. ⛔")
         return redirect('team_management', slug=slug)
 
     username = target_user.username
     target_user.delete()
 
-    messages.success(request, f"User {username} has been removed successfully. ✅ ")
+    messages.success(request, f"User {username} has been removed successfully. ✅")
     return redirect('team_management', slug=slug)
 
 
@@ -147,7 +148,8 @@ def change_user_role_view(request, slug, user_id):
         form = ChangeRoleForm(request.POST, instance=target_user, current_user=request.user)
 
         # Extra guard clause
-        if request.user.role == 'business_owner' and target_user.role == 'business_owner' and request.POST.get('role') != 'business_owner':
+        if request.user.role == 'business_owner' and target_user.role == 'business_owner' and request.POST.get(
+                'role') != 'business_owner':
             messages.error(request, "You cannot change the role of another Business Owner. 🚫")
             return redirect('team_management', slug=business.slug)
 
@@ -156,7 +158,8 @@ def change_user_role_view(request, slug, user_id):
 
             # Already has this role
             if target_user.role == new_role:
-                messages.warning(request, f"{target_user.username} already has the role {target_user.get_role_display()}. ⚠️")
+                messages.warning(request,
+                                 f"{target_user.username} already has the role {target_user.get_role_display()}. ⚠️")
                 return redirect('team_management', slug=business.slug)
 
             # Prevent demoting the last business owner
@@ -171,7 +174,8 @@ def change_user_role_view(request, slug, user_id):
                     return redirect('team_management', slug=business.slug)
 
             form.save()
-            messages.success(request, f"{target_user.username}'s role was updated to {target_user.get_role_display()}. ✅")
+            messages.success(request,
+                             f"{target_user.username}'s role was updated to {target_user.get_role_display()}. ✅")
             return redirect('team_management', slug=business.slug)
         else:
             return render(request, 'core/partials/_change_role.html', {
@@ -187,6 +191,33 @@ def change_user_role_view(request, slug, user_id):
         'target_user': target_user,
         'business': business,
     })
+
+
+@login_required
+@business_required
+def update_profile_view(request, slug):
+    business = request.business
+    user = request.user
+
+    if user.business != business:
+        return render(request, 'core/error/403.html', status=403)
+
+    if request.method == 'POST':
+        form = UpdateProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully. ✅")
+            return redirect('team_management', slug=business.slug)
+    else:
+        # GET request, return the form only (no validation!)
+        form = UpdateProfileForm(instance=user)
+
+    return render(request, 'core/partials/_update_profile.html', {
+        'form': form,
+        'business': business,
+        'user': user,
+    })
+
 
 
 #######################################
@@ -327,7 +358,6 @@ def invite_team_member_view(request, slug):
         'form': form,
         'business': business,
     })
-
 
 
 @login_required

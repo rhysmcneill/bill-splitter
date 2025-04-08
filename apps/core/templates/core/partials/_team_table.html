@@ -44,7 +44,13 @@
             <div class="inline-flex items-center gap-3 text-sm text-blue-500">
               {% if request.user == user %}
                 <!-- Self -->
-                <a href="#" class="hover:underline">Update Profile</a>
+                  <a href="#"
+                     hx-get="{% url 'update_profile' business.slug %}"
+                     hx-target="body"
+                     hx-swap="beforeend"
+                     class="hover:underline text-sm text-blue-500">
+                    Update Profile
+                  </a>
               {% elif request.user.role == 'business_owner' %}
                 <!-- Owner managing other users -->
                <a href="#"

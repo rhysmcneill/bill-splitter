@@ -84,3 +84,14 @@ class ChangeRoleForm(forms.ModelForm):
         # Case 3: Owner modifying non-owner – allow all roles
         else:
             self.fields['role'].choices = all_choices
+
+
+class UpdateProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm'}),
+            'last_name': forms.TextInput(attrs={'class': 'w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm'}),
+            'email': forms.EmailInput(attrs={'class': 'w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm'}),
+        }

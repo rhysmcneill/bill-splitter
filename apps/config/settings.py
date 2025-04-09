@@ -70,7 +70,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.business_middleware.BusinessMiddleware',
-    "core.middleware.enforce_password_change.ForcePasswordChangeMiddleware",  # ← Add this!
+    "core.middleware.enforce_password_change.ForcePasswordChangeMiddleware",
+    'django_htmx.middleware.HtmxMiddleware',
 
 ]
 

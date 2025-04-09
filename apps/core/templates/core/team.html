@@ -14,12 +14,44 @@
       </a>
     </div>
 
+    <!-- Search Form -->
+    <div class="mb-4 relative w-full md:w-1/2">
+      <input
+        type="text"
+        name="search"
+        id="search"
+        placeholder="🔎 Search by username or email"
+        class="w-full border border-gray-300 rounded-md px-4 py-2 pr-10 shadow-sm text-sm"
+        hx-get="{% url 'team_management' business.slug %}"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#team-table"
+        hx-indicator="#search-spinner"
+        hx-push-url="false"
+        autocomplete="off"
+      />
+
+      <!-- Spinner positioned inside input -->
+      <div id="search-spinner" class="absolute inset-y-0 right-3 flex items-center hidden htmx-indicator">
+        <svg class="animate-spin h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10"
+                  stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      </div>
+    </div>
+
+
+
+
     <!-- Messages -->
     {% include "core/partials/_messages.html" %}
 
 
     <!-- Team Table -->
-    {% include "core/partials/_team_table.html" %}
+    <div id="team-table">
+      {% include "core/partials/_team_table.html" %}
+    </div>
 
     <!-- Invite Button for Admins/Owners -->
     {% if request.user.role == 'admin' or user.role == 'business_owner' %}

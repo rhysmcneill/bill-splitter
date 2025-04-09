@@ -12,6 +12,8 @@ from django.core.mail import EmailMultiAlternatives
 from .utils.password_generator import generate_temp_password
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.db.models import Q
+
 
 
 #######################################
@@ -96,12 +98,24 @@ def team_management_view(request, slug):
     if business != request.business:
         return render(request, 'core/error/403.html', status=403)
 
+    query = request.GET.get("search", "")
     team_members = User.objects.filter(business=business)
 
-    return render(request, 'core/team.html', {
-        'business': business,
-        'team_members': team_members,
-    })
+    if query:
+        team_members = team_members.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )
+
+    if request.headers.get('HX-Request'):
+        return render(request, "core/partials/_team_table.html", {
+            "team_members": team_members,
+            "business": business,
+        })
+
+    return render(request, "core/team.html", {
+            "team_members": team_members,
+            "business": business,
+        })
 
 
 @login_required

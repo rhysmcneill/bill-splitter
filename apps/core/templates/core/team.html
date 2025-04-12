@@ -53,32 +53,30 @@
       {% include "core/partials/_team_table.html" %}
     </div>
 
-<!-- Pagination + Invite in one row -->
-<!-- Pagination + Invite in one row -->
-<!-- Pagination + Invite in one row on desktop -->
-<div class="mt-10 grid grid-cols-1 sm:grid-cols-3 items-center gap-4">
+    <!-- Pagination + Invite in one row -->
+    <div class="mt-10 grid grid-cols-1 sm:grid-cols-3 items-center gap-4">
 
-  <!-- Empty placeholder (left side) -->
-  <div></div>
+      <!-- Empty placeholder (left side) -->
+      <div></div>
 
-  <!-- Pagination centered -->
-  <div class="flex justify-center">
-    {% include "core/partials/_pagination.html" %}
-  </div>
+      <!-- Pagination centered -->
+      <div class="flex justify-center">
+        {% include "core/partials/_pagination.html" %}
+      </div>
 
-  <!-- Invite button right-aligned -->
-  {% if request.user.role == 'admin' or user.role == 'business_owner' %}
-  <div class="flex justify-end">
-    <a href="#"
-       hx-get="{% url 'invite_team_member' business.slug %}"
-       hx-target="body"
-       hx-swap="beforeend"
-       class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium whitespace-nowrap">
-      ➕ Invite Member
-    </a>
-  </div>
-  {% endif %}
-</div>
+      <!-- Invite button right-aligned -->
+      {% if request.user.role == 'admin' or user.role == 'business_owner' %}
+      <div class="flex justify-end">
+        <a href="#"
+           hx-get="{% url 'invite_team_member' business.slug %}"
+           hx-target="body"
+           hx-swap="beforeend"
+           class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium whitespace-nowrap">
+          ➕ Invite Member
+        </a>
+      </div>
+      {% endif %}
+    </div>
 
 
 

@@ -72,7 +72,6 @@ MIDDLEWARE = [
     'core.middleware.business_middleware.BusinessMiddleware',
     "core.middleware.enforce_password_change.ForcePasswordChangeMiddleware",
     'django_htmx.middleware.HtmxMiddleware',
-
 ]
 
 ROOT_URLCONF = 'config.urls'

@@ -7,7 +7,8 @@ from django.contrib import messages
 from .models import Bill, Payment
 from .helpers.formset import get_bill_item_formset
 from .helpers.pagination import paginate_queryset
-
+from django.http import JsonResponse
+from .ocr.service import extract_items_from_receipt
 
 @login_required
 @business_required
@@ -197,3 +198,20 @@ def view_bill_view(request, business_slug, uuid):
         'bill': bill,
         'items': bill.items.all()
     })
+
+
+def upload_receipt_view(request):
+    if request.method == "POST" and request.FILES.get("receipt"):
+        receipt_file = request.FILES["receipt"]
+
+        # Save temp file
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=True) as tmp:
+            for chunk in receipt_file.chunks():
+                tmp.write(chunk)
+            tmp.flush()
+            result = extract_items_from_receipt(tmp.name)
+
+        return JsonResponse(result)
+
+    return JsonResponse({"error": "No receipt uploaded"}, status=400)

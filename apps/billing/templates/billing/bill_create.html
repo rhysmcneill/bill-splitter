@@ -39,13 +39,15 @@
       <h2 class="text-lg font-semibold text-gray-800 mb-2">Items</h2>
 
       <!-- 📸 Scan Receipt CTA -->
-      <div class="mb-4">
-        <button type="button"
-          class="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-lg shadow-sm transition"
-          disabled>
-          📸 Scan a Receipt (Coming Soon)
-        </button>
-      </div>
+      <!-- Hidden File Input -->
+      <input type="file" accept="image/*" @change="uploadReceipt($event)" class="hidden" id="receipt-upload" />
+
+      <!-- Scan Receipt Button -->
+      <button type="button"
+        class="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-lg shadow-sm transition"
+        @click.prevent="document.getElementById('receipt-upload').click()">
+        📸 Scan a Receipt
+      </button>
 
       {{ formset.management_form }}
 
@@ -127,30 +129,64 @@ function billFormHandler() {
       priceError: '',
     })),
     lastItemRef: null,
-      add() {
-        this.forms.push({
-          _delete: false,
-          name: '',
-          price: '',
-          nameError: '',
-          priceError: '',
-        });
 
-        this.$nextTick(() => {
-          const container = document.getElementById('create-formset-container');
-          if (container) {
-            // Scroll container to bottom
-            container.scrollTop = container.scrollHeight;
+    uploadReceipt(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-            // Focus the name input of the newly added item
-            const inputs = container.querySelectorAll('.item-name-input');
-            inputs[inputs.length - 1]?.focus();
-          }
-        });
-      },
+      const formData = new FormData();
+      formData.append("receipt", file);
+
+      fetch("{% url 'upload-receipt' %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.items && Array.isArray(data.items)) {
+          this.forms = data.items.map(item => ({
+            name: item.description || '',
+            price: item.price || '',
+            _delete: false,
+            nameError: '',
+            priceError: ''
+          }));
+        } else {
+          alert("OCR failed or returned no items.");
+        }
+      })
+      .catch(err => {
+        console.error("OCR error:", err);
+        alert("There was a problem scanning the receipt.");
+      });
+    },
+
+    add() {
+      this.forms.push({
+        _delete: false,
+        name: '',
+        price: '',
+        nameError: '',
+        priceError: '',
+      });
+
+      this.$nextTick(() => {
+        const container = document.getElementById('create-formset-container');
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+          const inputs = container.querySelectorAll('.item-name-input');
+          inputs[inputs.length - 1]?.focus();
+        }
+      });
+    },
+
     remove(index) {
       this.forms.splice(index, 1);
     },
+
     validate() {
       let isValid = true;
       this.forms.forEach(form => {
@@ -168,6 +204,7 @@ function billFormHandler() {
       });
       return isValid;
     },
+
     totalAmount() {
       return this.forms.reduce((sum, form) => {
         if (!form._delete && form.price) {

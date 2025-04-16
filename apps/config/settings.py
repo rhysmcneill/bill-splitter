@@ -34,7 +34,7 @@ EMAIL_HOST_PASSWORD = config('MAILTRAP_PASSWORD')
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = '<no-reply@dividr.com>'
 
-ALLOWED_HOSTS = ['192.168.1.7', '127.0.0.1']  # TO-DO: Remove * when going to prod
+ALLOWED_HOSTS = ['192.168.1.7', '127.0.0.1', '0.0.0.0']  # TO-DO: Remove * when going to prod
 
 # Application definition
 AUTH_USER_MODEL = 'core.customUser'

@@ -2,13 +2,19 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from core.decorators import business_required
 from django.views.decorators.http import require_POST
-from .forms import BillForm, BillItemFormSet
+from .forms import BillForm
 from django.contrib import messages
-from .models import Bill, Payment
+from .models import Bill
 from .helpers.formset import get_bill_item_formset
 from .helpers.pagination import paginate_queryset
 from django.http import JsonResponse
 from .ocr.service import extract_items_from_receipt
+from django.http import JsonResponse
+from billing.ocr.service import extract_items_from_receipt
+import tempfile
+import os
+import traceback
+
 
 @login_required
 @business_required
@@ -202,16 +208,27 @@ def view_bill_view(request, business_slug, uuid):
 
 def upload_receipt_view(request):
     if request.method == "POST" and request.FILES.get("receipt"):
-        receipt_file = request.FILES["receipt"]
+        try:
+            uploaded_file = request.FILES["receipt"]
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp:
+                for chunk in uploaded_file.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
 
-        # Save temp file
-        import tempfile
-        with tempfile.NamedTemporaryFile(delete=True) as tmp:
-            for chunk in receipt_file.chunks():
-                tmp.write(chunk)
-            tmp.flush()
-            result = extract_items_from_receipt(tmp.name)
+            try:
+                result = extract_items_from_receipt(tmp_path)
+                return JsonResponse({"items": result["items"]})
+            except ValueError as ve:
+                print(f"🔥 OCR Upload Error: {ve}")
+                return JsonResponse({"error": str(ve)}, status=400)
+            except Exception as e:
+                print(f"🔥 OCR Upload Error: {e}")
+                return JsonResponse({"error": "Unexpected error during OCR."}, status=500)
+            finally:
+                os.remove(tmp_path)
 
-        return JsonResponse(result)
+        except Exception as e:
+            print(f"🔥 File Save Error: {e}")
+            return JsonResponse({"error": "Failed to upload file."}, status=500)
 
-    return JsonResponse({"error": "No receipt uploaded"}, status=400)
+    return JsonResponse({"error": "No file uploaded."}, status=400)

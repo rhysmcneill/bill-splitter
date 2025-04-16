@@ -1,37 +1,41 @@
 import os
 from decimal import Decimal
-from billing.helpers.image_utils import convert_heic_to_jpeg
-from billing.helpers.tabscanner import submit_to_tabscanner, poll_tabscanner_result
+from billing.helpers.image_utils import convert_heic_to_jpeg, is_supported_image
+from billing.helpers.tabscanner import submit_to_tabscanner, poll_tabscanner_result, is_valid_item
 
 
 def extract_items_from_receipt(image_path):
-    """
-    Submit image to Tabscanner, wait for result, return structured line items.
-    """
     original_ext = os.path.splitext(image_path)[1].lower()
 
-    if original_ext == ".heic":
+    if not is_supported_image(image_path):
+        raise ValueError(f"Unsupported file extension: {original_ext}")
+
+    # Convert HEIC if needed
+    temp_jpeg_path = None
+    if original_ext in [".heic", ".heif"]:
         print("📸 Converting HEIC image to JPEG...")
-        image_path = convert_heic_to_jpeg(image_path)
+        temp_jpeg_path = convert_heic_to_jpeg(image_path)
+        image_path = temp_jpeg_path
 
     token = submit_to_tabscanner(image_path)
     parsed_data = poll_tabscanner_result(token)
 
-    # Optionally remove temp file if it was HEIC → JPEG
-    if original_ext == ".heic" and os.path.exists(image_path):
-        os.remove(image_path)
+    # Clean up temp JPEG file
+    if temp_jpeg_path and os.path.exists(temp_jpeg_path):
+        os.remove(temp_jpeg_path)
 
     items = []
-    for item in parsed_data.get("items", []):
-        if item.get("description") and item.get("amount"):
-            try:
+    for item in parsed_data.get("lineItems", []):
+        desc = item.get("descClean") or item.get("desc", "").strip()
+        price = item.get("lineTotal") or item.get("price", 0)
+        try:
+            if is_valid_item(desc, float(price)):
                 items.append({
-                    "description": item["description"].strip(),
-                    "price": Decimal(item["amount"]),
-                    "quantity": int(item.get("quantity") or 1),
+                    "description": desc,
+                    "price": Decimal(str(price)),
                 })
-            except Exception:
-                continue
+        except Exception:
+            continue
 
     return {
         "merchant": parsed_data.get("merchant_name"),

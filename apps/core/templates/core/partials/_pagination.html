@@ -1,0 +1,47 @@
+ <!-- Centered Pagination Block -->
+  <div class="flex flex-col items-center justify-center w-full sm:w-auto mx-auto">
+    {% if page_obj.has_other_pages %}
+      <div class="flex flex-wrap justify-center sm:justify-center gap-2 text-sm">
+        {% if page_obj.has_previous %}
+          <a hx-get="?page={{ page_obj.previous_page_number }}{% if query %}&search={{ query }}{% endif %}"
+             hx-target="#team-table"
+             hx-push-url="false"
+             class="px-3 py-1 border rounded hover:bg-blue-100 text-gray-600 font-medium cursor-pointer transition">
+            ← Prev
+          </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="px-3 py-1 border rounded bg-blue-500 text-white font-semibold cursor-default">
+              {{ num }}
+            </span>
+          {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+            <a hx-get="?page={{ num }}{% if query %}&search={{ query }}{% endif %}"
+               hx-target="#team-table"
+               hx-push-url="false"
+               class="px-3 py-1 border rounded hover:bg-blue-100 text-gray-600 font-medium cursor-pointer transition">
+              {{ num }}
+            </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a hx-get="?page={{ page_obj.next_page_number }}{% if query %}&search={{ query }}{% endif %}"
+             hx-target="#team-table"
+             hx-push-url="false"
+             class="px-3 py-1 border rounded hover:bg-blue-100 text-gray-600 font-medium cursor-pointer transition">
+            Next →
+          </a>
+        {% endif %}
+      </div>
+
+      <p class="text-gray-600 text-sm mt-2 text-center">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+      </p>
+    {% else %}
+      <p class="text-gray-600 text-sm text-center">
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+      </p>
+    {% endif %}
+  </div>

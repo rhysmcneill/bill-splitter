@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.shortcuts import render, redirect, reverse
 from .forms import BusinessSignupForm, BusinessLoginForm, BusinessInfoForm, InviteUserForm, ChangeRoleForm, \
-     UpdateProfileForm
+    UpdateProfileForm
 from .models import CustomUser as User, Business
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
@@ -13,13 +13,12 @@ from .utils.password_generator import generate_temp_password
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import Q
-
+from billing.helpers.pagination import paginate_queryset
 
 
 #######################################
 #       Dashboard/Business views
 #######################################
-
 def landing_view(request):
     # Session-aware redirect
     if request.user.is_authenticated and getattr(request, 'business', None):
@@ -105,17 +104,27 @@ def team_management_view(request, slug):
         team_members = team_members.filter(
             Q(username__icontains=query) | Q(email__icontains=query)
         )
+    per_page = int(request.GET.get('per_page', 7))
+    page_obj, querystring = paginate_queryset(request, team_members, per_page=per_page)
 
     if request.headers.get('HX-Request'):
         return render(request, "core/partials/_team_table.html", {
             "team_members": team_members,
             "business": business,
+            "page_obj": page_obj,
+            "query": query,
+            "querystring": querystring,
+            "per_page": per_page,
         })
 
     return render(request, "core/team.html", {
-            "team_members": team_members,
-            "business": business,
-        })
+        "team_members": team_members,
+        "business": business,
+        "page_obj": page_obj,
+        "query": query,
+        "querystring": querystring,
+        "per_page": per_page,
+    })
 
 
 @login_required
@@ -231,7 +240,6 @@ def update_profile_view(request, slug):
         'business': business,
         'user': user,
     })
-
 
 
 #######################################

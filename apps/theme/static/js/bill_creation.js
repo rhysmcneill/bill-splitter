@@ -1,5 +1,4 @@
-// this handles bill creation, including OCR
-function billFormHandler({ initialCount = 0, uploadUrl = '', csrfToken = '' }) {
+function billFormHandler({ initialCount = 0, uploadUrl = "", csrfToken = "" }) {
   return {
     forms: Array.from({ length: initialCount }, () => ({
       _delete: false,
@@ -10,6 +9,7 @@ function billFormHandler({ initialCount = 0, uploadUrl = '', csrfToken = '' }) {
     })),
     loading: false,
     error: false,
+    isConfidenceWarning: false,
     errorMessage: '',
 
     uploadReceipt(event) {
@@ -18,7 +18,8 @@ function billFormHandler({ initialCount = 0, uploadUrl = '', csrfToken = '' }) {
 
       this.loading = true;
       this.error = false;
-      this.errorMessage = "";
+      this.errorMessage = '';
+      this.isConfidenceWarning = false;
 
       const formData = new FormData();
       formData.append("receipt", file);
@@ -30,40 +31,53 @@ function billFormHandler({ initialCount = 0, uploadUrl = '', csrfToken = '' }) {
         },
         body: formData
       })
-      .then(async response => {
-        const data = await response.json();
-        this.loading = false;
+        .then(async response => {
+          const data = await response.json();
+          this.loading = false;
 
-        if (!response.ok) {
-          this.errorMessage = data.error || "Unexpected error occurred during receipt processing.";
-          this.error = true;
-          return;
-        }
+          if (!response.ok) {
+            this.error = true;
+            this.errorMessage = data.error || "Unexpected error occurred.";
+            return;
+          }
 
-        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-          this.forms = data.items
-            .filter(item => item.description && item.price)
-            .map(item => ({
-              name: item.description,
-              price: parseFloat(item.price).toFixed(2),
-              _delete: false,
-              nameError: '',
-              priceError: ''
-            }));
-        } else {
-          this.errorMessage = "OCR returned no valid items.";
-          this.error = true;
-        }
-      })
+          // 👇 Show confidence warning if flagged
+          if (data.low_confidence) {
+            this.error = true;
+            this.isConfidenceWarning = true;
+            this.errorMessage = `⚠️ AI image scanning accuracy is low (${Math.round(data.total_confidence * 100)}%). Please double-check all items.`;
+          }
+
+          if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+            this.forms = data.items
+              .filter(item => item.description && item.price)
+              .map(item => ({
+                name: item.description,
+                price: parseFloat(item.price).toFixed(2),
+                _delete: false,
+                nameError: '',
+                priceError: ''
+              }));
+
+            this.$nextTick(() => {
+              const container = document.getElementById('create-formset-container');
+              if (container) {
+                container.scrollTop = container.scrollHeight;
+              }
+            });
+          } else {
+            this.error = true;
+            this.errorMessage = "OCR returned no valid items.";
+          }
+        })
+
       .catch(err => {
         console.error("OCR error:", err);
         this.loading = false;
-        this.errorMessage = "There was a problem scanning the receipt.";
         this.error = true;
+        this.errorMessage = "There was a problem scanning the receipt.";
       });
     },
-
-
 
     add() {
       this.forms.push({

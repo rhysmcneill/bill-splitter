@@ -217,7 +217,11 @@ def upload_receipt_view(request):
 
             try:
                 result = extract_items_from_receipt(tmp_path)
-                return JsonResponse({"items": result["items"]})
+                return JsonResponse({
+                    "items": result["items"],
+                    "low_confidence": result["low_confidence"],
+                    "total_confidence": result["total_confidence"],
+                })
             except ValueError as ve:
                 print(f"🔥 OCR Upload Error: {ve}")
                 return JsonResponse({"error": str(ve)}, status=400)

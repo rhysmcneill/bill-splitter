@@ -37,9 +37,19 @@ def extract_items_from_receipt(image_path):
         except Exception:
             continue
 
+    # Extract and evaluate OCR confidence
+    total_conf = parsed_data.get("totalConfidence", 1)
+    sub_conf = parsed_data.get("subTotalConfidence", 1)
+
+    low_confidence = total_conf < 0.80 or sub_conf < 0.80
+
     return {
         "merchant": parsed_data.get("merchant_name"),
         "date": parsed_data.get("date"),
         "total": parsed_data.get("total"),
-        "items": items
+        "total_confidence": total_conf,
+        "sub_total_confidence": sub_conf,
+        "items": items,
+        "low_confidence": low_confidence
     }
+

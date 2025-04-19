@@ -4,9 +4,44 @@
 {% block title %}Create New Bill - dividr.{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto p-6 bg-white rounded shadow" x-data="billFormHandler()" x-init>
+<div class="max-w-2xl mx-auto p-6 bg-white rounded shadow relative"
+     x-data='billFormHandler({
+       initialCount: {{ formset.total_form_count }},
+       uploadUrl: "{% url "upload-receipt" %}",
+       csrfToken: "{{ csrf_token }}"
+     })'
+     x-init>
   <h1 class="text-2xl font-bold text-blue-500 mb-4">Create New Bill</h1>
 
+  <!-- Loading Overlay -->
+  <div x-show="loading"
+       class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50 transition-opacity"
+       style="backdrop-filter: blur(4px);">
+    <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+    </svg>
+  </div>
+
+  <!-- Error / Warning Modal -->
+  <div x-show="error" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded shadow p-6 max-w-sm w-full text-center">
+      <template x-if="isConfidenceWarning">
+        <h2 class="text-lg font-semibold mb-2 text-yellow-500">⚠️ Low AI Confidence</h2>
+      </template>
+      <template x-if="!isConfidenceWarning">
+        <h2 class="text-lg font-semibold mb-2 text-red-600">❌ Oops! Something went wrong</h2>
+      </template>
+      <p class="text-sm text-gray-700 mb-4" x-text="errorMessage"></p>
+      <button @click="error = false"
+              class="mt-2 px-4 py-2 text-white rounded bg-blue-500 hover:bg-blue-600">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Form -->
   <form method="post" class="space-y-6" @submit.prevent="if (validate()) $event.target.submit()">
     {% csrf_token %}
 
@@ -38,26 +73,24 @@
     <div>
       <h2 class="text-lg font-semibold text-gray-800 mb-2">Items</h2>
 
-      <!-- 📸 Scan Receipt CTA -->
-      <div class="mb-4">
-        <button type="button"
-          class="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-lg shadow-sm transition"
-          disabled>
-          📸 Scan a Receipt (Coming Soon)
-        </button>
-      </div>
+      <input type="file" accept="image/*" @change="uploadReceipt($event)" class="hidden" id="receipt-upload" />
+      <button type="button"
+              class="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-lg shadow-sm transition"
+              @click.prevent="document.getElementById('receipt-upload').click()">
+        📸 Scan a Receipt
+      </button>
 
       {{ formset.management_form }}
 
       <div id="create-formset-container" class="space-y-4 max-h-64 overflow-y-auto pr-1">
         <template x-for="(form, index) in forms" :key="index">
-          <div class="border p-4 rounded bg-gray-50 bill-item-block" :ref="el => (index === forms.length - 1 ? (lastItemRef = el) : null)">
+          <div class="border p-4 rounded bg-gray-50 bill-item-block">
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input type="text" :name="`items-${index}-name`" x-model="form.name"
-                  class="item-name-input block w-full border rounded-md px-3 py-2 shadow-sm"
-                  :class="form.nameError ? 'border-red-500' : 'border-gray-300'" />
+                       class="item-name-input block w-full border rounded-md px-3 py-2 shadow-sm"
+                       :class="form.nameError ? 'border-red-500' : 'border-gray-300'" />
                 <template x-if="form.nameError">
                   <p class="text-sm text-red-500 mt-1" x-text="form.nameError"></p>
                 </template>
@@ -65,20 +98,18 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Price (£)</label>
                 <input type="number" step="0.01" :name="`items-${index}-price`" x-model="form.price"
-                  class="block w-full border rounded-md px-3 py-2 shadow-sm"
-                  :class="form.priceError ? 'border-red-500' : 'border-gray-300'" />
+                       class="block w-full border rounded-md px-3 py-2 shadow-sm"
+                       :class="form.priceError ? 'border-red-500' : 'border-gray-300'" />
                 <template x-if="form.priceError">
                   <p class="text-sm text-red-500 mt-1" x-text="form.priceError"></p>
                 </template>
               </div>
             </div>
-
             <input type="hidden" :name="`items-${index}-DELETE`" x-model="form._delete" />
-
             <div class="flex justify-end mt-3">
               <button type="button"
-                class="text-sm text-red-600 hover:text-red-800 font-medium"
-                @click="remove(index)">
+                      class="text-sm text-red-600 hover:text-red-800 font-medium"
+                      @click="remove(index)">
                 ✖ Remove
               </button>
             </div>
@@ -86,16 +117,14 @@
         </template>
       </div>
 
-      <!-- Add another item -->
       <div class="text-right mt-2">
         <button type="button"
-          class="text-sm text-blue-500 hover:text-blue-700 font-medium"
-          @click="add()">
+                class="text-sm text-blue-500 hover:text-blue-700 font-medium"
+                @click="add()">
           ➕ Add Another Item
         </button>
       </div>
 
-      <!-- Total forms tracking -->
       <input type="hidden" name="items-TOTAL_FORMS" :value="forms.length" />
       <input type="hidden" name="items-INITIAL_FORMS" value="{{ formset.initial_form_count }}" />
       <input type="hidden" name="items-MIN_NUM_FORMS" value="0" />
@@ -115,69 +144,4 @@
     </div>
   </form>
 </div>
-
-<script>
-function billFormHandler() {
-  return {
-    forms: Array.from({ length: {{ formset.total_form_count }} }, () => ({
-      _delete: false,
-      name: '',
-      price: '',
-      nameError: '',
-      priceError: '',
-    })),
-    lastItemRef: null,
-      add() {
-        this.forms.push({
-          _delete: false,
-          name: '',
-          price: '',
-          nameError: '',
-          priceError: '',
-        });
-
-        this.$nextTick(() => {
-          const container = document.getElementById('create-formset-container');
-          if (container) {
-            // Scroll container to bottom
-            container.scrollTop = container.scrollHeight;
-
-            // Focus the name input of the newly added item
-            const inputs = container.querySelectorAll('.item-name-input');
-            inputs[inputs.length - 1]?.focus();
-          }
-        });
-      },
-    remove(index) {
-      this.forms.splice(index, 1);
-    },
-    validate() {
-      let isValid = true;
-      this.forms.forEach(form => {
-        form.nameError = '';
-        form.priceError = '';
-
-        if (!form.name.trim()) {
-          form.nameError = 'Name is required';
-          isValid = false;
-        }
-        if (!form.price || parseFloat(form.price) <= 0) {
-          form.priceError = 'Price must be a positive number';
-          isValid = false;
-        }
-      });
-      return isValid;
-    },
-    totalAmount() {
-      return this.forms.reduce((sum, form) => {
-        if (!form._delete && form.price) {
-          const price = parseFloat(form.price);
-          return sum + (isNaN(price) ? 0 : price);
-        }
-        return sum;
-      }, 0).toFixed(2);
-    }
-  }
-}
-</script>
 {% endblock %}

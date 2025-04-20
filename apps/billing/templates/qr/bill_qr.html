@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}QR Code for Table {{ bill.table_number }} - dividr.{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(90vh-100px)] px-4">
+  <div class="w-full max-w-md p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
+
+    <!-- ✅ Header -->
+    <div class="text-center space-y-1 mb-5">
+      <h1 class="text-2xl font-extrabold text-blue-500">Scan to Pay</h1>
+      <p class="text-sm text-gray-500">Customers can scan this QR code to view and split the bill.</p>
+    </div>
+
+    <!-- ✅ Meta Info -->
+    <div class="text-center text-sm text-gray-500 mb-6">
+      <p>🪑 <strong>Table {{ bill.table_number }}</strong></p>
+      <p>📅 Created: {{ bill.created_at|date:"j M Y, H:i" }}</p>
+    </div>
+
+    <!-- ✅ QR Code -->
+    <div class="flex justify-center mb-4">
+      <div class="p-5 bg-blue-50 rounded-xl shadow-inner">
+        <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="w-48 h-48 sm:w-52 sm:h-52" />
+      </div>
+    </div>
+
+    <!-- ✅ URL Fallback -->
+    <div class="text-center text-xs text-gray-400">
+      <p class="mb-1">Or visit:</p>
+      <a href="{{ qr_url }}" target="_blank"
+         class="break-words font-mono text-blue-600 hover:underline">
+        {{ qr_url }}
+      </a>
+    </div>
+
+    <!-- ✅ Back to Dashboard -->
+    <div class="text-center mt-3">
+      <a href="{% url 'list_bill' business_slug=bill.business.slug %}"
+         class="inline-block px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md shadow-sm transition">
+        ← Back to Bills
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

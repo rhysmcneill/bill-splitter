@@ -27,19 +27,26 @@
       </div>
     </div>
 
-    <div class="flex justify-end pointer-events-auto mt-3">
-      <div class="inline-flex gap-3 text-sm">
+    <!-- ✅ Action Buttons -->
+    <div class="mt-2 pointer-events-auto">
+      <div class="flex flex-wrap justify-end gap-2 pointer-events-auto mt-3 px-2">
+        <a href="{% url 'bill_qr' business.slug bill.uuid %}"
+           class="flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 hover:scale-105 transform transition font-medium text-xs sm:text-sm">
+          📷 <span>QR Code</span>
+        </a>
+
         <button
           hx-get="{% url 'update_bill' business.slug bill.uuid %}"
           hx-target="#update-modal-container"
           hx-swap="innerHTML"
-          class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium">
-          ✏️ Update
+          class="flex items-center gap-1 px-2.5 py-1 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 hover:scale-105 transform transition font-medium text-xs sm:text-sm">
+          ✏️ <span>Update</span>
         </button>
+
         <button type="button"
                 @click="showModal = true; actionUrl = '{% url 'delete_bill' business.slug bill.uuid %}'"
-                class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium">
-          🗑 Delete
+                class="flex items-center gap-1 px-2.5 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 hover:scale-105 transform transition font-medium text-xs sm:text-sm">
+          🗑 <span>Delete</span>
         </button>
       </div>
     </div>

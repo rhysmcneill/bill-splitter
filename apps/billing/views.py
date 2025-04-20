@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from core.decorators import business_required
 from django.views.decorators.http import require_POST
 from .forms import BillForm
@@ -7,13 +8,12 @@ from django.contrib import messages
 from .models import Bill
 from .helpers.formset import get_bill_item_formset
 from .helpers.pagination import paginate_queryset
-from django.http import JsonResponse
 from .ocr.service import extract_items_from_receipt
 from django.http import JsonResponse
 from billing.ocr.service import extract_items_from_receipt
-import tempfile
-import os
-import traceback
+import tempfile, os, qrcode, base64
+from qrcode.image.pil import PilImage
+from io import BytesIO
 
 
 @login_required
@@ -105,8 +105,7 @@ def create_bill_view(request, business_slug):
                     item.save()
 
                 formset.save_m2m()
-                messages.success(request, f"The bill was created successfully for table {bill.table_number}! 🎉")
-                return redirect('list_bill', business_slug=business.slug)
+                return redirect('bill_qr', business_slug=business.slug, uuid=bill.uuid)
         else:
             BillItemFormSet = get_bill_item_formset(creating_new=True)
             formset = BillItemFormSet(request.POST or None)
@@ -236,3 +235,55 @@ def upload_receipt_view(request):
             return JsonResponse({"error": "Failed to upload file."}, status=500)
 
     return JsonResponse({"error": "No file uploaded."}, status=400)
+
+
+@login_required
+@business_required
+def bill_qr_view(request, business_slug, uuid):
+    try:
+        bill = Bill.objects.get(uuid=uuid)
+    except Bill.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    # Ensure the bill belongs to the correct business
+    if bill.business.slug != business_slug:
+        return render(request, 'core/error/403.html', status=403)
+
+    # Build absolute URL to /pay/<uuid> page
+    qr_url = f"{settings.SITE_DOMAIN}/pay/{bill.uuid}/"
+
+    # Generate QR Code using the latest qrcode library style
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(qr_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(image_factory=PilImage)
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    return render(request, 'qr/bill_qr.html', {
+        'bill': bill,
+        'qr_code_base64': qr_base64,
+        'qr_url': qr_url,
+    })
+
+
+def customer_bill_view(request, uuid):
+    try:
+        bill = Bill.objects.get(uuid=uuid)
+    except Bill.DoesNotExist:
+        return render(request, 'core/error/404.html', status=404)
+
+    # Calculate bill totals
+    bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
+    bill.total_due = sum(i.price for i in bill.items.all())
+
+    return render(request, 'billing/customer_bill.html', {
+        'bill': bill,
+    })

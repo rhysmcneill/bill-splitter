@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import connect_stripe_view, manage_stripe_account_view, customer_bill_view , identify_participant_modal, \
-    identify_participant_submit, choose_payment_mode_view
+    identify_participant_submit
 
 
 urlpatterns = [
@@ -14,6 +14,5 @@ urlpatterns = [
     # Identify customer
     path("pay/<uuid:uuid>/identify/", identify_participant_modal, name="identify_participant_modal"),
     path("pay/<uuid:uuid>/identify/submit/", identify_participant_submit, name="identify_participant_submit"),
-    path("pay/<uuid:uuid>/choose/", choose_payment_mode_view, name="choose_payment_mode"),
 
 ]

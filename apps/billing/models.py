@@ -70,3 +70,14 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.payment_method} payment of £{self.amount}"
+
+
+class BillParticipant(models.Model):
+    bill = models.ForeignKey("Bill", related_name="participants", on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    is_initiator = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.email}) - {'Initiator' if self.is_initiator else 'Guest'}"

@@ -1,0 +1,48 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+     hx-on="htmx:afterOnLoad:document.body.classList.add('overflow-hidden')"
+     hx-on="htmx:afterSwap:document.body.classList.remove('overflow-hidden')"
+     id="identify-participant-modal"
+     x-data>
+  <div class="w-full px-4 sm:px-0">
+    <div class="bg-white w-full max-w-md mx-auto p-6 rounded-2xl shadow-2xl border border-blue-100 relative">
+
+      <!-- Header -->
+      <h2 class="text-xl font-extrabold text-blue-500 text-center mb-4">Who's paying?</h2>
+      <p class="text-sm text-gray-500 text-center mb-4">We’ll use this to track your part of the bill and send a receipt.</p>
+
+      <!-- Form -->
+      <form method="POST"
+            action="{% url 'identify_participant_submit' uuid=bill.uuid %}"
+            hx-post="{% url 'identify_participant_submit' uuid=bill.uuid %}"
+            hx-target="closest div[id^='identify-participant-modal']"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="space-y-4">
+          <div>
+            <label for="id_name" class="block text-sm font-medium text-gray-700">Name</label>
+            <input type="text" name="name" id="id_name" required autofocus autocomplete="name"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="id_email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" name="email" id="id_email" required autocomplete="email"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-6 gap-3">
+          <button type="button"
+                  @click="$el.closest('div[id^=\'identify-participant-modal\']')?.remove()"
+                  class="w-32 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm font-medium">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="w-32 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded text-sm transition">
+            Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

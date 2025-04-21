@@ -43,10 +43,13 @@
 
     <!-- CTA -->
     <div class="text-center pt-2">
-      <a href="#"
-         class="inline-block px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition">
+      <button
+        hx-get="{% url 'identify_participant_modal' uuid=bill.uuid %}"
+        hx-target="body"
+        hx-swap="beforeend"
+        class="inline-block px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition">
         💳 I want to pay!
-      </a>
+      </button>
     </div>
 
   </div>

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Bill, BillItem
+from .models import Bill, BillItem, BillParticipant
 from django.forms import inlineformset_factory
 
 
@@ -13,6 +13,7 @@ class BillForm(forms.ModelForm):
             'notes': forms.Textarea(attrs={'rows': 2}),
         }
 
+
 BillItemFormSet = inlineformset_factory(
     Bill,
     BillItem,
@@ -20,6 +21,7 @@ BillItemFormSet = inlineformset_factory(
     extra = 1,
     can_delete=True
 )
+
 
 class UpdateBillForm(forms.ModelForm):
     class Meta:

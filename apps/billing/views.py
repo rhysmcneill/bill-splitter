@@ -1,19 +1,24 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
+import base64
+import os
+import qrcode
+import tempfile
+from io import BytesIO
+
+from billing.ocr.service import extract_items_from_receipt
 from core.decorators import business_required
-from django.views.decorators.http import require_POST
-from .forms import BillForm
+from django.conf import settings
 from django.contrib import messages
-from .models import Bill
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+from qrcode.image.pil import PilImage
+
+from .forms import BillForm
 from .helpers.formset import get_bill_item_formset
 from .helpers.pagination import paginate_queryset
+from .models import Bill
 from .ocr.service import extract_items_from_receipt
-from django.http import JsonResponse
-from billing.ocr.service import extract_items_from_receipt
-import tempfile, os, qrcode, base64
-from qrcode.image.pil import PilImage
-from io import BytesIO
 
 
 @login_required
@@ -273,17 +278,3 @@ def bill_qr_view(request, business_slug, uuid):
         'qr_url': qr_url,
     })
 
-
-def customer_bill_view(request, uuid):
-    try:
-        bill = Bill.objects.get(uuid=uuid)
-    except Bill.DoesNotExist:
-        return render(request, 'core/error/404.html', status=404)
-
-    # Calculate bill totals
-    bill.total_paid = sum(p.amount for p in bill.payments.filter(status='confirmed'))
-    bill.total_due = sum(i.price for i in bill.items.all())
-
-    return render(request, 'billing/customer_bill.html', {
-        'bill': bill,
-    })

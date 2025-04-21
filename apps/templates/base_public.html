@@ -1,0 +1,50 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}dividr.{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tailwind CSS -->
+    <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+
+    <!-- HTMX (optional for interactivity) -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.5"></script>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
+    <!-- JS Scripts (shared with base) -->
+    <script src="{% static 'js/formset_helpers.js' %}" defer></script>
+    <script src="{% static 'js/spinner.js' %}" defer></script>
+    <script src="{% static 'js/bill_creation.js' %}" defer></script>
+
+    <!-- AlpineJS -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-white shadow-sm py-4">
+    <div class="w-full px-6 sm:px-16 flex justify-between items-center">
+      <a href="{% url 'landing' %}" class="text-3xl font-bold text-blue-500">dividr.</a>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+    <main class="flex-grow">
+      <div class="max-w-3xl mx-auto px-4 pb-0.5 pt-2">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-200 text-center py-3 text-sm text-gray-600">
+    &copy; {{ now|date:"Y" }} dividr. All rights reserved.
+  </footer>
+</body>
+
+</html>

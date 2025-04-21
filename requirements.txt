@@ -11,3 +11,4 @@ python-decouple
 django-htmx
 pillow
 pillow-heif
+qrcode[pil]

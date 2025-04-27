@@ -6,7 +6,7 @@
 <div class="flex items-center justify-center min-h-[calc(100vh-112px)] px-4">
   <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-6">
 
-    <!-- Header -->
+    <!-- Header & Meta -->
     <div class="text-center space-y-1">
       <h1 class="text-2xl font-extrabold text-blue-500">Split the Bill</h1>
       <p class="text-gray-500 text-sm">
@@ -14,9 +14,8 @@
       </p>
     </div>
 
-    <!-- Meta Info with Emojis -->
     <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700 space-y-1">
-      <p><strong>📅 Date:</strong> {{ bill.created_at|date:"j M Y, H:i" }}</p>
+      <p><strong>🗓️ Date:</strong> {{ bill.created_at|date:"j M Y, H:i" }}</p>
       <p><strong>💰 Total:</strong> £{{ bill.total_due|default:"0.00"|floatformat:2 }}</p>
       <p><strong>💳 Paid:</strong> £{{ bill.total_paid|default:"0.00"|floatformat:2 }}</p>
       <p><strong>📌 Status:</strong>
@@ -41,15 +40,9 @@
       </div>
     </div>
 
-    <!-- CTA -->
-    <div class="text-center pt-2">
-      <button
-        hx-get="{% url 'identify_participant_modal' uuid=bill.uuid %}"
-        hx-target="body"
-        hx-swap="beforeend"
-        class="inline-block px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition">
-        💳 I want to pay!
-      </button>
+    <!-- Modal Wrapper -->
+    <div id="modal-wrapper">
+      {% include "partials/_identify_user_and_choose.html" %}
     </div>
 
   </div>

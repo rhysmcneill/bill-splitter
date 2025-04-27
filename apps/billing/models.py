@@ -9,6 +9,20 @@ class Bill(models.Model):
     table_number = models.CharField(max_length=10)
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    PAYMENT_MODES = [
+        ("equal", "Equally"),
+        ("custom", "Unequally"),
+        ("items", "Itemised"),
+    ]
+    ...
+    payment_mode = models.CharField(max_length=10, choices=PAYMENT_MODES, null=True, blank=True)
+    payment_mode_locked_by = models.ForeignKey(
+        'BillParticipant',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='locked_bills'
+    )
     status = models.CharField(
         max_length=10,
         choices=[

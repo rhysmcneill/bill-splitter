@@ -1,0 +1,84 @@
+{% extends "base_public.html" %}
+{% block title %}Equal - dividr.{% endblock %}
+
+{% load static %}
+{% load dict_utils %}
+
+
+{% block content %}
+<div class="flex flex-col items-center justify-start min-h-[calc(100vh-112px)] px-4 pt-8"
+     xmlns="http://www.w3.org/1999/html">
+
+  <!-- Main Equal Split Card -->
+  <div class="w-full max-w-md min-h-[72vh] bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-6 text-center">
+
+    <h1 class="text-2xl font-extrabold text-blue-500 mb-2">Equal Split</h1>
+
+    <p class="text-gray-700 text-md">
+      💰 Total: <strong>£{{ bill.total_amount|floatformat:2 }}</strong>
+    </p>
+
+    <p class="text-gray-700 text-sm">
+      {% if bill.participant_count %}
+        This bill is being equally split among <strong>{{ bill.participant_count }}</strong> people.
+      {% else %}
+        No participant count set yet.
+      {% endif %}
+    </p>
+
+    <!-- ⬇️ This wrapper always exists so the target never errors -->
+    <div id="participant-list-wrapper" class="max-h-[19rem] overflow-y-auto pr-1 space-y-2">
+      {% if bill.participant_count %}
+        <div id="participant-list">
+          {% include "partials/_participant_list.html" %}
+        </div>
+      {% else %}
+        <div id="participant-list"></div> <!-- placeholder prevents targetError -->
+      {% endif %}
+    </div>
+
+    <!-- ✅ Polling to refresh participants (when participant_count is set) -->
+    <div
+      hx-get="{% url 'equal_split_participants' uuid=bill.uuid %}"
+      hx-trigger="every 3s"
+      hx-target="#participant-list"
+      hx-swap="outerHTML"
+      class="hidden">
+    </div>
+
+  </div>
+  <!-- Modal only shown if participant_count is not set -->
+  {% if not bill.participant_count %}
+  <div x-data="{ showModal: true }" @close-modal.window="showModal = false">
+    <div x-show="showModal"
+         x-transition.opacity.duration.300ms
+         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 sm:p-0"
+         x-cloak>
+      <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-sm text-center space-y-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-blue-500">How many people are splitting?</h2>
+        <form method="post" action="{% url 'equal_split' uuid=bill.uuid %}" class="space-y-4">
+          {% csrf_token %}
+          <input type="number" name="participant_count" min="2" required
+                 class="block w-24 mx-auto text-center rounded border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-base text-sm py-2" />
+          <button type="submit"
+                  class="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded transition">
+            Confirm
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- 🔁 Poll to detect when participant_count gets set -->
+    <div
+      id="polling-participant-count"
+      hx-get="{% url 'check_participant_count' uuid=bill.uuid %}"
+      hx-trigger="every 3s"
+      hx-swap="none"
+      class="hidden">
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% load status_badge %}
+<div id="participant-list">
+  <h3 class="text-sm font-semibold text-gray-800 mb-2">Participants</h3>
+
+  {% if participants %}
+    <div class="max-h-[18rem] overflow-y-auto pr-2 space-y-2">
+      {% for participant in participants %}
+        <div class="border rounded p-2 bg-gray-50 text-sm flex justify-between items-center">
+          <span>{{ participant.name }}</span>
+          <div class="text-right text-xs text-gray-600 flex flex-col items-end space-y-1">
+            <div class="flex items-center gap-2">
+              {% if participant.payment_status != "paid" %}
+                <span>Owes: £{{ participant.amount_owed|floatformat:2 }}</span>
+              {% endif %}
+              <span class="px-0.5 py-0.5 text-[0.6rem] rounded font-semibold {% status_badge_class participant.payment_status %}">
+                {{ participant.payment_status|capfirst }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if participant_id and not has_paid %}
+      <form action="{% url 'create_checkout_session' uuid=bill.uuid participant_id=participant_id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit"
+                class="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded transition">
+          Pay My Share
+        </button>
+      </form>
+    {% elif participant_id and has_paid %}
+      <div class="mt-4 w-full bg-green-50 border-l-4 border-green-400 text-green-800 text-sm px-4 py-3 rounded relative">
+        <div class="flex items-start space-x-2">
+          <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.414 7.414a1 1 0 01-1.414 0L3.293 9.707a1 1 0 111.414-1.414L8 11.586l6.293-6.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <p class="text-sm">
+            <strong>Success:</strong> You’ve already paid your share.
+          </p>
+        </div>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <p class="text-gray-500 text-sm italic">No one has joined yet.</p>
+  {% endif %}
+</div>

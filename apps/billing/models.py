@@ -16,6 +16,7 @@ class Bill(models.Model):
     ]
     ...
     payment_mode = models.CharField(max_length=10, choices=PAYMENT_MODES, null=True, blank=True)
+    participant_count = models.PositiveIntegerField(null=True, blank=True)
     payment_mode_locked_by = models.ForeignKey(
         'BillParticipant',
         null=True,

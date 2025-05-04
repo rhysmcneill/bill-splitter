@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import connect_stripe_view, manage_stripe_account_view, customer_bill_view , \
     choose_payment_mode_view, pay_for_bill, set_payment_mode, check_payment_mode, \
-    identify_user_and_choose
+    identify_user_and_choose, split_equal_view, check_participant_count, participant_list_partial, create_checkout_session, \
+    payment_success
 
 
 urlpatterns = [
@@ -10,19 +11,17 @@ urlpatterns = [
     path('business/<slug:slug>/connect-stripe/', connect_stripe_view, name='connect_stripe'),
     path('business/<slug:slug>/manage-stripe/', manage_stripe_account_view, name='manage_stripe'),
 
-    path('pay/<uuid:uuid>/', customer_bill_view, name='customer_bill'),
-
-    # Identify customer
-    # path("pay/<uuid:uuid>/identify/", identify_participant_modal, name="identify_participant_modal"),
-    # path("pay/<uuid:uuid>/identify/submit/", identify_participant_submit, name="identify_participant_submit"),
-
+    # Payment flow views
     path("pay/<uuid:uuid>/choose/", choose_payment_mode_view, name="choose_payment_mode"),
-    path("pay/<uuid:uuid>/choose/set-mode/", set_payment_mode, name="set_payment_mode"),  # Updated
-    path("pay/<uuid:uuid>/choose/check-mode/", check_payment_mode, name="check_payment_mode"),  # Polling
+    path("pay/<uuid:uuid>/choose/check-mode/", check_payment_mode, name="check_payment_mode"),  # Polling bill splitter
     path("pay/<uuid:uuid>/", pay_for_bill, name="pay_for_bill"),
-
-    #new
+    path('pay/<uuid:uuid>/split/equal/', split_equal_view, name='equal_split'),
+    path('pay/<uuid:uuid>/split/equal/check/', check_participant_count, name='check_participant_count'),  # Polling
+    path('pay/<uuid:uuid>/split/equal/participants/', participant_list_partial, name='equal_split_participants'),
+    path('pay/<uuid:uuid>/split/equal/participants/', participant_list_partial, name='equal_split_participants'),
     path("pay/<uuid:uuid>/identify/choose/", identify_user_and_choose, name="identify_user_and_choose"),
-
+    path('pay/<uuid:uuid>/participant/<int:participant_id>/checkout/', create_checkout_session,
+         name='create_checkout_session'),
+    path('pay/<uuid:uuid>/participant/<int:participant_id>/success/', payment_success, name='payment_success'),
 
 ]

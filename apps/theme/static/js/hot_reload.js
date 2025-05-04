@@ -1,13 +1,11 @@
-// This is for hot-reload during the payment stage in /choose endpoint - this redirect user to the choice when one of the
-// users chooses the bill splitting method.
-document.body.addEventListener('htmx:afterOnLoad', function(event) {
-  const response = event.detail.xhr.response;
-  try {
-    const data = JSON.parse(response);
-    if (data.redirect_url) {
-      window.location.href = data.redirect_url;  // Auto-redirect when mode is set
+// hot reload for /equal when participant count modal is completed.
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("htmx:afterOnLoad", function (event) {
+    if (
+      event.target.id === "polling-participant-count" &&
+      event.detail.xhr.responseText === "set"
+    ) {
+      window.location.reload();
     }
-  } catch (e) {
-    // Ignore non-JSON responses
-  }
+  });
 });

@@ -15,12 +15,12 @@ def require_participant(view_func):
             return render(request, 'core/error/404.html', status=404)
 
         if not participant_id:
-            return redirect("identify_participant_modal", uuid=uuid)
+            return redirect("pay_for_bill", uuid=uuid)
 
         try:
             participant = BillParticipant.objects.get(id=participant_id, bill=bill)
         except BillParticipant.DoesNotExist:
-            return redirect("identify_participant_modal", uuid=uuid)
+            return redirect("pay_for_bill", uuid=uuid)
 
         # Attach participant to request object for convenience
         request.participant = participant

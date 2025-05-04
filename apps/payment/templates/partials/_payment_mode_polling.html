@@ -1,5 +1,6 @@
 {% if not bill.payment_mode %}
   <h2 class="text-sm font-semibold text-gray-700 mb-2 text-center">How do you want to split the bill?</h2>
+
   <!-- Warning Message -->
   <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 text-xs rounded-md p-3 mb-3">
     ⚠️ Your choice will apply to <strong>everyone</strong> and cannot be changed unless reset by a staff member.
@@ -13,11 +14,15 @@
       </button>
     {% endfor %}
   </div>
+
 {% else %}
   <p class="text-sm text-gray-600 italic text-center">
     This bill is being split <strong>{{ bill.get_payment_mode_display|lower }}</strong>
     (chosen by <strong>{{ bill.payment_mode_locked_by.name }}</strong>).
   </p>
+
+  <input type="hidden" name="mode" value="{{ bill.payment_mode }}">
+
   <div class="flex justify-end mt-6 gap-3">
     <button type="button"
             @click="showModal = false"

@@ -242,7 +242,6 @@ def upload_receipt_view(request):
     return JsonResponse({"error": "No file uploaded."}, status=400)
 
 
-@login_required
 @business_required
 def bill_qr_view(request, business_slug, uuid):
     try:

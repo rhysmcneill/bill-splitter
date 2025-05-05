@@ -211,21 +211,48 @@ def identify_user_and_choose(request, uuid):
     except Bill.DoesNotExist:
         return render(request, 'core/error/404.html', status=404)
 
+    # Already joined? Redirect them.
+    participant_id = request.session.get(f"participant_id_{bill.uuid}")
+    if participant_id:
+        return redirect('pay_for_bill', uuid=bill.uuid)
+
+    # Enforce participant limit
+    current_count = bill.participants.count()
+    if bill.participant_count and current_count >= bill.participant_count:
+        return render(request, 'payment/user_limit_reached.html', {
+            'bill': bill,
+            'qr_url': reverse('bill_qr', kwargs={
+                'business_slug': bill.business.slug,
+                'uuid': bill.uuid
+            }),
+            'message': "This bill already has the maximum number of participants. If you believe this is a mistake "
+                       "speak to a staff member.",
+        })
+
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
         mode = request.POST.get('mode')
 
-        print("MODE RECEIVED:", mode)
-
         if not name or not email or not mode:
-            # Handle missing fields gracefully
             return render(request, 'payment/customer_bill.html', {
                 'bill': bill,
                 'payment_modes': Bill.PAYMENT_MODES,
             })
 
-        # Create the participant
+        # Re-check in POST (race condition safety)
+        current_count = bill.participants.count()
+        if bill.participant_count and current_count >= bill.participant_count:
+            return render(request, 'payment/user_limit_reached.html', {
+                'bill': bill,
+                'qr_url': reverse('bill_qr', kwargs={
+                    'business_slug': bill.business.slug,
+                    'uuid': bill.uuid
+                }),
+                'message': "Sorry, this bill is already full. If you believe this is a mistake speak to a staff member.",
+            })
+
+        # Create participant
         participant = BillParticipant.objects.create(
             bill=bill,
             name=name,
@@ -233,13 +260,13 @@ def identify_user_and_choose(request, uuid):
         )
         request.session[f"participant_id_{bill.uuid}"] = participant.id
 
-        # Lock the payment mode if it isn't already set
+        # Lock mode if not set
         if not bill.payment_mode:
             bill.payment_mode = mode
             bill.payment_mode_locked_by = participant
             bill.save()
 
-        # Redirect based on split mode
+        # Redirect by mode
         if mode == 'equal':
             return redirect('equal_split', uuid=bill.uuid)
         elif mode == 'custom':
@@ -247,13 +274,7 @@ def identify_user_and_choose(request, uuid):
         elif mode == 'items':
             return redirect('itemized_split', uuid=bill.uuid)
         else:
-            # Fallback if somehow an invalid mode slips through
             return redirect('pay_for_bill', uuid=bill.uuid)
-
-    # Handle GET request (session check)
-    participant_id = request.session.get(f"participant_id_{bill.uuid}")
-    if participant_id:
-        return redirect('pay_for_bill', uuid=bill.uuid)
 
     return render(request, 'payment/customer_bill.html', {
         'bill': bill,

@@ -33,6 +33,7 @@
       </a>
     </div>
 
+    {% if request.user.is_authenticated %}
     <!-- ✅ Back to Dashboard -->
     <div class="text-center mt-3">
       <a href="{% url 'list_bill' business_slug=bill.business.slug %}"
@@ -40,6 +41,7 @@
         ← Back to Bills
       </a>
     </div>
+    {% endif %}
 
   </div>
 </div>

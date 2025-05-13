@@ -1,0 +1,72 @@
+<div id="participant-share-wrapper" class="space-y-4">
+
+  <!-- Participant Count -->
+  <p class="text-sm text-gray-600 text-center">
+    {% if shares %}
+      {{ shares|length }} participant{{ shares|length|pluralize }} {{ shares|length|pluralize:"has,have" }} contributed shares so far.
+    {% else %}
+      No shares submitted yet.
+    {% endif %}
+  </p>
+
+  <!-- Shares List -->
+  {% if shares %}
+    <h3 class="text-sm font-semibold text-gray-800 text-left">Participants</h3>
+    <div class="max-h-[18rem] overflow-y-auto pr-2 space-y-2">
+      {% for share in shares %}
+        <div class="border rounded p-2 bg-indigo-50 text-sm flex justify-between items-center">
+          <span>{{ share.participant.name }}</span>
+          <div class="text-right text-xs text-gray-600 flex flex-col items-end space-y-1">
+            <div class="flex items-center gap-2">
+              <span>{{ share.percentage }}% (≈ £{{ share.amount|floatformat:2 }})</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-400 italic text-sm text-center">No one has selected a share yet.</p>
+  {% endif %}
+
+      <!-- ✅ Payment Success Message -->
+    {% if participant_id and has_paid %}
+      <div class="w-full bg-green-50 border-l-4 border-green-400 text-green-800 text-sm px-4 py-3 rounded relative">
+        <div class="flex items-start space-x-2">
+          <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.414 7.414a1 1 0 01-1.414 0L3.293 9.707a1 1 0 111.414-1.414L8 11.586l6.293-6.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <p><strong>Success:</strong> You’ve already paid your share.</p>
+        </div>
+      </div>
+    {% endif %}
+
+  <!-- Progress -->
+  <hr class="my-2">
+  {% if total_percentage < 100 %}
+    <p class="text-sm text-gray-600 text-center">
+      <strong>{{ total_percentage|floatformat:2 }}%</strong> of the bill has been claimed.
+    </p>
+  {% endif %}
+
+  <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+    <div class="bg-green-500 h-2 rounded-full transition-all duration-300"
+         style="width: {{ paid_percentage|floatformat:2 }}%;">
+    </div>
+  </div>
+
+  <p class="text-sm font-semibold text-green-600 text-center">
+    {{ paid_percentage|floatformat:2 }}% of the bill has been paid.
+  </p>
+
+  <!-- Pay Button -->
+  {% if participant_id and total_percentage == 100 and not has_paid %}
+    <form action="{% url 'create_checkout_session' uuid=bill.uuid participant_id=participant_id %}" method="POST">
+      {% csrf_token %}
+      <button type="submit"
+              class="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded transition">
+        Pay My Share
+      </button>
+    </form>
+  {% endif %}
+
+</div>
